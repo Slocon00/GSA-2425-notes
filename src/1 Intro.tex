@@ -1,0 +1,161 @@
+\chapter{Introduction}
+
+A geographin information system (GIS) is a computer system used to capture, store, query, analyze, and display geospatial data. \textbf{Geospatial data} describes both the location and the characteristics of spatial features: for example, if we want to describe a road, we may refer to its location and its features (length, name, speed limit, etc.). Other than single entities, geospatial data can also describe trajectories, specifying the sequence of locations constituting it.
+
+\section{Geographic Coordinate Systems}
+
+When using a GIS, any map layers used together must align spatially; to make sure this is true, we need to use some common spatial reference system for all maps. GIS users normally work with locations expressed on a plane using a coordinate system expressed in x- and y-coordinates, while the actual, real-life locations represented by them are on Earth's surface (which is ellipsoidal). A \textbf{map projection} is used to convert the Earth's surface to a plane.
+
+The system used to locate points on Earth is called \textbf{geographic coordinate system}. This system is defined by two coordinates: \textbf{longitude} and \textbf{latitude}. They are angular measures which measure the angle at which the point can be found with respect to the \textbf{prime meridian} and the \textbf{equator}; longitute represents the angle east or west from the prime meridian, while latitude represents the angle north or south of the equatorial plane.
+
+\textbf{Meridians} are lines of equal longitude. The prime meridian passes through Greenwich, England, and corresponds to 0°. \textbf{Parallels} are lines of equal latitude. The equator is the line corresponding to 0° latitude.
+
+In a \textbf{plane coordinates} system, longitute and latitude correspond to x and y coordinates respectively. Logitude takes positive values in the easter hemisphere, and negative values in the western hemisphere; latitude takes positive values north of the equator, and negative values south of the equator.
+\\
+Longitute and latitude values may be expressed in different ways:
+\begin{itemize}
+    \item \textbf{Decimal degrees} (\textbf{DD}): represented by a single decimal value;
+    \item \textbf{Degrees-minutes-seconds} (\textbf{DMS}): represented by a set of three values, corresponding to degrees, minutes, and seconds. 1 degree corresponds to 60 minutes, and 1 minute corresponds to 60 seconds;
+    \item \textbf{Radians} (\textbf{rad}): similar to DD, but expressed in radians instead of decimal values: 1 degree is equal to 0.01745 rad.
+\end{itemize}
+
+As mentioned before, planet Earth can be approximated as an \textbf{ellipsoid}: this shape is obtained by rotating an ellipse by its shortest axis. Indeed, Earth is wider along the equator (its major axis) than it is between the poles (its minor axis). Another parameter that describes an ellipsoid is the \textbf{flattening} ($f$), calculated as $f = \frac{maj - min}{maj}$, and it describes the difference between the two axes.
+
+A \textbf{datum} is a mathematical model of the Earth which is used as the reference to calculate the geographic coordinates of a point (or even the elevation, if we consider vertical datums). A datum is defined as: the pair \textit{longitude, latitude} of coordinates of an initial point wich will be the origin, an ellipsoid, and the separation of the ellipsiod and the Earth at the origin.
+
+Distances on the Earth's surface are not straight lines; they are instead represented by \textbf{geodesics}: through any two points (not antipodal), there is exactly one ``great circle'' that connects them. The two points separate the great circle in two parts: the shorter of the two is their geodesic distance. Since the Earth is nearly spherical, geodesic distances are correct with an error up to $0.5\%$. The geodesic distance between points $A$ and $B$ is calculated as:
+\begin{equation*}
+    \cos(d) = \sin(\textit{lat}_A) \sin(\textit{lat}_B) + \cos(\textit{lat}_B) + cos(\textit{lon}_A - \textit{lon}_B),
+\end{equation*}
+where $d$ is the angular distance between the two points.
+
+\section{Trajectories, Tessellations, Flows}
+
+Let $u$ be an individual. A \textbf{trajectory} $T_u = \langle p_1, p_2, \dots, p_{nu} \rangle$ is a time-ordered sequence composed by the spatio-temporal points visited by $u$. A spatio-temporal \textbf{point} is a pair $p = (t,l)$, where $t$ is the time, and $l=(x,y)$ is the point visited at that time.
+
+Given an area $A$, a \textbf{tessellation} is a set of geographical polygons with the following properties:
+\begin{itemize}
+    \item It contains a finite number of polygons called \textbf{tiles}:
+    \begin{equation*}
+        \mathbb{G} = \{g_i : i = 1, \dots, n\}
+    \end{equation*}
+    \item The tiles are non overlapping:
+    \begin{equation*}
+        g_i \cap g_j = \emptyset \,, \forall i \neq j
+    \end{equation*}
+    \item The union of all tiles completely covers the tessellation:
+    \begin{equation*}
+        \bigcup_{i=1}^n g_i = A
+    \end{equation*}
+\end{itemize}
+A tessellation can be \textbf{regular} or \textbf{irregular} depending on the shape of its tiles. Regular tessellation may use equilateral triangles, squares, hexagons; irregular tessellation may use buildings, census cells, administrative units. A \textbf{spatial join} is used to associate a point with the tile it belongs to. Since the tiles are non overlapping and cover the entire area, each point belongs to one and only one tile. \textbf{Voronoi tesselations} are a particular type of tessellation that partition the plane into regions (called \textbf{cells}), each closer to a secific point (called \textbf{seed}) out of a set. Each of these cells is defined as the set of points that are closest to the seed of the cell itself than any other seed in that area.
+
+Given a tessellation, the \textbf{flow}
+\begin{equation*}
+    y(g_i. g_j)
+\end{equation*}
+represents the number of people/objects moving between $g_i$ and $g_j$. A trajectory refers to a single entity, while a flow refers to the total amount of entities moving between two points. Flows can be derived from a set of trajectories, but the inverse is not true.
+
+\section{Raster and Vector Data Models}
+
+The raster and vector data models are two ways to represent geographic information in GISs. In both cases, data can be stored in several \textbf{thematic layers}, each of which contains a set of objects of the same nature. For example, a layer may contain information about buildings, another about streets, another about rivers, and so on.
+
+The \textbf{raster data} model divides the space into a regular grid of square cells with a given size (which defines the \textbf{resolution}). This format is often used for images, where each element corresponds to a pixel. Depending on how much information is assigned to a cell, data can be \textbf{single-band} (one attribute per cell), or \textbf{multi-band} (several attributes per cell). Raster data is typically sourced from satellites.
+
+The \textbf{vector data} model uses discrete objects (points, lines, polygons) to represent spatial features. Each object can have its own properties and relationship with the others. A \textbf{point} is a zero-dimensional object with a \textit{location} property (expressed as x,y coordinates). A \textbf{line} in a one-dimensional object with two properties: \textit{location} and \textit{lenght}. It be either straight or curved. A \textbf{polygon} is a two-dimensional object with three properties: \textit{location}, \textit{area}, and \textit{perimeter}. These objects are expressed differently depending on the data format used by the software/platform.
+
+Objects in a layer are sometimes also called \textit{spatial features}; for this reasin, the variables associated to them are called \textit{attributes} (and not features). To represent geometric objects in a GIS, we can use one of the following models:
+\begin{itemize}
+    \item \textbf{Geo-relational data model}, where objects and attributes are stored separately, and associating each object to the corresponding attributes requires a join operation (at the advantage of possibly saving space if a certain attribute(s) is (are) only possessed by few objects);
+    \item \textbf{Object-relational data model}, where objects and attributes are stored together in a single table, making retrieval much faster (but possibly increasing the amount of space needed to store everything). 
+\end{itemize}
+
+In principle, vectors can model everything; raster data is a discretized view of the same information. Raster data is better suited for ``dense'' data; it can be more efficient in those cases where a raster representation may need a very high number of objects, but precision is not a concern. Vector data can also be converted to raster data, and vice versa. \textbf{Rasterization} is the process of transforming vector data into raster data, and produces a discrete approximation. \textbf{Vectorization} is the inverse process: it may be difficult at times, and many algorithms and methods have been developed to perform it.
+
+At times, vectors and raster information can be used together in multi-layer data. Some information is better modeled with one format than the other: for example, street networks or locations of interest are often encoded as vector layers, while things like land usage are encoded as raster layers.
+
+\section{Spatial Operations}
+
+The most important spatial operations are:
+\begin{itemize}
+    \item \textbf{Intersection}: returns all the points in common with the operands.
+    \item \textbf{Union}: returns the union of the two operands. In some tools, They are kept as separate objects, meaning that the result is always a multipolygon. As an alternate operation, the same tools offer the \textbf{dissolve} operation, which instead merges the two objects into a single one.
+    \item \textbf{Difference}: returns all the points in the first operand which are not in the second.
+    \item \textbf{Buffering}: creates a buffer, i.e., an expanded area, around the object. The result is equivalent to replacing each point in the geometry with a circle with a given radius.
+    \item \textbf{Spatial join}: like in relational databases, joins merge the information of two objects. THe join can be \textbf{inner} (the output contains only pairs in common with both objects), or \textbf{outer/left/right} (the output also contains non matching objects with the \textit{NULL} value in place of the missing attributes). 
+\end{itemize}
+
+\section{Spatial Patterns and Spatial Correlation}
+
+\textbf{Point Pattern Analysi}s (\textbf{PAA}) is the study of point patterns, i.e., the spatial distribution of points in an area. Spatial distributions are typically categorized into three types:
+\begin{itemize}
+    \item \textbf{Uniform (discrete)}: points are evenly distributed in the area;
+    \item \textbf{Random}: points are distributed according to a random process;
+    \item \textbf{Clustered}: points appear to be grouped (clustered) in some areas.
+\end{itemize}
+A basic form of point pattern analysis consists in determining summary statistics such as mean center, standard distance, and standard deviational ellipse.
+\BoxDef{Mean Center}{
+\begin{equation*}
+    \bar{s} = \left( \frac{\sum_{i=1}^n x_i}{n} , \frac{\sum_{i=1}^n y_i}{n} \right)
+\end{equation*}
+}
+Mean center is the average of the x and y coordinate values.
+
+\BoxDef{Standard Distance}{
+\begin{equation*}
+    d = \sqrt{\frac{\sum_{i=1}^n (x_i - \mu_x)^2 + (y_i - \mu_y)^2}{n}}
+\end{equation*}
+}
+Standard distance measures the variance between the average distance of the features to the mean center.
+
+\BoxDef{Standard Deviational Ellipse}{
+\begin{align*}
+    &d_x = \sqrt{\frac{\sum_{i=1}^n (x_i - \mu_x)^2}{n}} \\
+    &d_y = \sqrt{\frac{\sum_{i=1}^n (y_i - \mu_y)^2}{n}}
+\end{align*}
+}
+Similar to standand distance, standard deviational ellipse measures the standard distances for each axis.
+
+\textbf{Average Nearest Neighbor} (\textbf{ANN}) is an algorithm that can be used to study patterns. For each point, its nearest neighbor is found as the point with the smallest distance to it. The average of all points' nearest neighbor distance is calculated as $d_{obs}$, and normalized with regards to the expected average if the pattern were random ($d_{exp}$), obtaining a ratio:
+\begin{equation*}
+    R = \frac{d_{obs}}{d_{exp}}
+\end{equation*}
+If $R = 1$, the pattern is random. If $R < 1$, the pattern is clustered, because the distances are smaller than expected; if $R > 1$, the pattern is uniform (or at least more dispersed than random).
+
+\textbf{Ripley's K-function} is another popular method for analyzing point patterns. Usually, its normalized version, called \textbf{L function}, is used. Given $n$ points in an area of size $A$, and a distance $d$, the L function is calculated as follows:
+\begin{enumerate}
+    \item Compute all $n*(n-1)$ distances between each pair of points;
+    \item Compute $\phi$, the fraction of distances that are $ \leq d$;
+    \item Compute
+    \begin{equation*}
+        L(d) = \sqrt{\frac{A}{\pi} \phi} \,.
+    \end{equation*}
+\end{enumerate}
+$L(d) = d$ for random distributions. If $L(d)$ is higher, the data is more clustered; if it is lower, the data is more dispersed. Different values of $d$ can be explored to understand patterns at different spatial granularities.
+
+Another important aspect is \textbf{density based analysis}. Density measurements can be either global or local. \textbf{Global density} is simply calculated as the ratio of observed points and the study region's area:
+\begin{equation*}
+    \hat{\lambda} = \frac{n}{A}
+\end{equation*}
+Density can also be measured at different locations of the study region. \textbf{Local density} is computed over a single tessellation cell; the chosen resolution will affect the resulting density calculation. \textbf{Kernel density} is another method of calculating density per-cell which considers also the points found in its neighborhood. Usually, given a cell $c$, the 8 adjacent cells are considered as the neighborhood $N_c$, and so the kernel density becomes:
+\begin{equation*}
+    \textit{Kernel density} \ (c) = \hat{\lambda}(c \cup N_c)
+\end{equation*}
+A variant is \textbf{weighted kernel density}, which assigns to each point a weight inversely proportional to the distance from the cell's center. Different weight functions can be used; a common one is the Gaussian function.
+
+Autocorrelation is the correlation of the values of a same variable measured at different points in time (\textbf{temporal autocorrelation})/space (\textbf{spatial autocorrelation}). An example of spatial autocorralation may be checking how much the temperature values in the points of a layer are influenced by the neighboring values. According to \href{https://en.wikipedia.org/wiki/Tobler%27s_first_law_of_geography}{\textbf{Tobler's first law of geography}}, ``everything is related to everything else, but near things are more related than distant things'': this is the fundamental assumption in spatial analysis.
+
+Popular measures of spatial autocorrelation are:    
+\begin{itemize}
+    \item \textbf{Moran's I}, which calculates the autocorrelation between values of each point against all other points in its neighborhood:
+    \begin{equation*}
+        I = \frac{\sum_{i=1}^n \sum_{j: x_j \in N_{x_i}} w_{ij} (x_i - \mu_x)(x_j - \mu_x)}{s^2 \sum_{i=1}^n \sum_{j: x_j \in N_{x_i}} w_{ij}} 
+    \end{equation*}
+    where $s^2$ is the variance of the $x$ values, and $w_{ij}$ is a weight, typically defined as the inverse of the distance between the two points. Positive values mean positive correlation, negative values mean negative correlation;
+    \item \textbf{Geary's C}:
+    \begin{equation*}
+        C = \frac{n-1 \sum_{i=1}^n \sum_{j: x_j \in N_{x_i}} w_{ij} (x_i - x_j)^2}{2 (\sum_{i=1}^n \sum_{j: x_j \in N_{x_i}} w_{ij}) * \sum_{i=1}^n (x_i - \mu_x)^2}
+    \end{equation*}
+    The higher it is, the more different are nearby values (less correlation), the lower it is the closer they are (more correlation).
+\end{itemize}
+Both measures can also be interpreted as the average of local values calculated across neighborhoods. These local values can be studied individually as well.
