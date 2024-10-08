@@ -1,6 +1,7 @@
 \chapter{Introduction}
 
-A geographin information system (GIS) is a computer system used to capture, store, query, analyze, and display geospatial data. \textbf{Geospatial data} describes both the location and the characteristics of spatial features: for example, if we want to describe a road, we may refer to its location and its features (length, name, speed limit, etc.). Other than single entities, geospatial data can also describe trajectories, specifying the sequence of locations constituting it.
+A geographic information system (GIS) is a computer system used to capture, store, query, analyze, and display geospatial data. \textbf{Geospatial data} describes both the location and the characteristics of spatial features: for example, if we want to describe a road, we may refer to its location and its features (length, name, speed limit, etc.). Other than single entities, geospatial data can also describe trajectories, specifying the sequence of locations constituting it.\\
+The following chapter will give an overview of the basic concepts used in GISs and spatial data analysis.
 
 \section{Geographic Coordinate Systems}
 
@@ -93,28 +94,20 @@ The most important spatial operations are:
     \item \textbf{Random}: points are distributed according to a random process;
     \item \textbf{Clustered}: points appear to be grouped (clustered) in some areas.
 \end{itemize}
-A basic form of point pattern analysis consists in determining summary statistics such as mean center, standard distance, and standard deviational ellipse.
-\BoxDef{Mean Center}{
+A basic form of point pattern analysis consists in determining summary statistics such as mean center, standard distance, and standard deviational ellipse. \\
+\textbf{Mean center} is the average of the x and y coordinate values:
 \begin{equation*}
     \bar{s} = \left( \frac{\sum_{i=1}^n x_i}{n} , \frac{\sum_{i=1}^n y_i}{n} \right)
 \end{equation*}
-}
-Mean center is the average of the x and y coordinate values.
-
-\BoxDef{Standard Distance}{
+\textbf{Standard distance} measures the variance between the average distance of the features to the mean center:
 \begin{equation*}
     d = \sqrt{\frac{\sum_{i=1}^n (x_i - \mu_x)^2 + (y_i - \mu_y)^2}{n}}
 \end{equation*}
-}
-Standard distance measures the variance between the average distance of the features to the mean center.
-
-\BoxDef{Standard Deviational Ellipse}{
+Similar to standand distance, \textbf{standard deviational ellipse} measures the standard distances for each axis:
 \begin{align*}
     &d_x = \sqrt{\frac{\sum_{i=1}^n (x_i - \mu_x)^2}{n}} \\
     &d_y = \sqrt{\frac{\sum_{i=1}^n (y_i - \mu_y)^2}{n}}
 \end{align*}
-}
-Similar to standand distance, standard deviational ellipse measures the standard distances for each axis.
 
 \textbf{Average Nearest Neighbor} (\textbf{ANN}) is an algorithm that can be used to study patterns. For each point, its nearest neighbor is found as the point with the smallest distance to it. The average of all points' nearest neighbor distance is calculated as $d_{obs}$, and normalized with regards to the expected average if the pattern were random ($d_{exp}$), obtaining a ratio:
 \begin{equation*}
@@ -158,4 +151,98 @@ Popular measures of spatial autocorrelation are:
     \end{equation*}
     The higher it is, the more different are nearby values (less correlation), the lower it is the closer they are (more correlation).
 \end{itemize}
-Both measures can also be interpreted as the average of local values calculated across neighborhoods. These local values can be studied individually as well.
+Both measures can also be interpreted as the average of local I/C values calculated across neighborhoods. These local values can be studied individually as well.
+
+\section{Spatial Interpolation and Regression}
+
+Spatial interpolation refers to the process of using points with known values (called \textbf{control points}) to estimate values at others. For example, we could estimate the temperature at a point with no recorded data by approximating it from known temperatures at nearby points. Ideally, control points should be well distributed across the study area, although this situation is rare in real-world applications since a study area oftentimes also contains data-poor areas.
+
+Interpolation methods can be divided in two groups: \textbf{deterministic} and \textbf{stochastic}. The first group assumes that the known values are exact, with no assessment of errors for predicted values. The second group considers the presence of some random error in the known data and offers some assessment of prediction error with an estimated variance.
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.5\textwidth]{img/interpolation_original.png}
+    \caption{An example of samples corresponding to yearly precipitation recorded in different sites in Texas.}
+    \label{fig:interpolation_original}
+\end{figure}
+
+\subsection{Deterministic Methods}
+
+\subsubsection{Proximity Interpolation}
+
+Proximity interpolation (also known as \textbf{Thiessen interpolation}) is one of the simplest and oldest interpolation methods. The goal is to assign to all unsampled locations the value of the closest sampled location, producing a Voronoi tessellation over the study area. All the points within the same cell have the same value. A problem of this approach is that surface values change abruptly across the perimeter of adjacent cells, which is not realistic.
+
+\subsubsection{Inverse Distance Weighted Interpolation}
+
+Inverse Distance Weighted (IDW) interpolation calculates an average value using nearby weighted locations. The weight of each sample location is inversely proportional to the distance; the value at location $j$ is given by:
+\begin{equation*}
+    \hat{Z}_j = \frac{\sum_i Z_i / d_{ij}^n}{\sum_i 1 / d_{ij}^n}
+\end{equation*}
+Here, $d_{ij}$ is the distance between points $i$ and $j$, and $n$ is an hyperparameter that controls the irrelevance of a point as the distance increases/decreases: the larger $n$ is, the less far away samples influence the interpolated value. For $n \rightarrow \infty$, the result is equivalent to proximity interpolation. \\
+Values returned by this method are always within the range of the known values: $[Z_{min}, Z_{max}]$.
+
+\begin{figure}[ht!]
+    \centering
+    \begin{minipage}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{img/interpolation_proximity.png}
+        \caption{Interpolated values obtained by proximity interpolation.}
+        \label{fig:interpolation_proximity}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{img/interpolation_idw.png}
+        \caption{Interpolated values obtained by IDW interpolation.}
+        \label{fig:interpolation_idw}
+    \end{minipage}
+\end{figure}
+
+\subsection{Stochastic Methods}
+
+\subsubsection{Trend Surface Interpolation}
+
+Trend surface analysis approximates points with known values using a polynomial equation. The same equation can then be used to predict values at other points. Depending on the order of the polynomial, the approximation can be more or less complex:
+\begin{itemize}
+    \item A $0^{th}$ order surface is described by $Z = z$, where $c$ is the average value of all samples;
+    \item A $1^{st}$ order surface is described by $Z = aX + bY + z$, where $X, Y$ are the coordinate pairs and $c$ is a constant;
+    \item A $2^{nd}$ order surface is described by $Z = aX^2 + bY^2 + cXY + dX + eY + z$;
+\end{itemize}
+and so on. Changing the order allows the model to better capture the complexity of the data, but using a value that is too high may result in overfitting the data, meaning that the model is too dependant on the known information and does not provide a useful prediction.
+\begin{figure}[!ht]
+    \centering
+    \begin{minipage}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{img/interpolation_fst_order.png}
+        \caption{Interpolated values obtained by a $1^{st}$ order trend surface. The model is too rigid.}
+        \label{fig:interpolation_fst_order}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{img/interpolation_snd_order.png}
+        \caption{Interpolated values obtained by a $2^{nd}$ order trend surface. The model is better than before, but still not a good fit.}
+        \label{fig:interpolation_snd_order}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Kriging}
+
+Kriging differs from other methods in that it can assess the quality of prediction with estimated prediction errors. It assumes that the spatial variation of an attribute is neither random nor deterministic; instead, it is a combination of some spatially correlated component, a ``drift'' (assumed for now to be null), and a random error term.
+
+The first step is \textbf{de-trending the data}, so that mean and variance of the data are constant across the whole study area. This can be done by using any trend model and subtracting the predictions from the data. From this point on, the method will focus on residuals, i.e., the remaining variability in te data that is not explained by the global trend. The second step is \textbf{constructing a (semi)variogram}. For each pair of points $i$ and $j$, their semivariance is calculated as:
+\begin{equation*}
+    \gamma = \frac{(Z_i - Z_j)^2}{2}
+\end{equation*}
+The variogram is obtained as the plot of all the semivariances, using the $x$ axis to represent distances, and the $y$ axis to represent the semivariances. Usually, it is simplified by binning over the distance values and averaging the semivariances within each bin, obtaining a \textbf{sample experimental variogram}. The third step is to fit an \textbf{experimental variogram model} to find the parameters that best describe the spatial variance; there are many model variants, with the main ones being the Gaussian, linear, and spherical ones. Finally, \textbf{interpolation} can be performed. The general equation for estimating the residual at a point $j$ is:
+\begin{equation*}
+    z_j = \sum_{i=1}^s z_i W_i
+\end{equation*}
+where $s$ is the number of sample points used in the estimation, and $W_i$ is the weight assigned to point $i$. These weights are derived by solving a set of simultaneous equations.
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.5\textwidth]{img/interpolation_kriging.png}
+    \caption{Interpolated values obtained by kriging.}
+    \label{fig:interpolation_kriging}
+\end{figure}
+
+\section{Spatial Associations and Trend Detection}
