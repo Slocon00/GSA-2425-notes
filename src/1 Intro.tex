@@ -153,7 +153,7 @@ Popular measures of spatial autocorrelation are:
 \end{itemize}
 Both measures can also be interpreted as the average of local I/C values calculated across neighborhoods. These local values can be studied individually as well.
 
-\section{Spatial Interpolation and Regression}
+\section{Spatial Interpolation}
 
 Spatial interpolation refers to the process of using points with known values (called \textbf{control points}) to estimate values at others. For example, we could estimate the temperature at a point with no recorded data by approximating it from known temperatures at nearby points. Ideally, control points should be well distributed across the study area, although this situation is rare in real-world applications since a study area oftentimes also contains data-poor areas.
 
@@ -245,4 +245,52 @@ where $s$ is the number of sample points used in the estimation, and $W_i$ is th
     \label{fig:interpolation_kriging}
 \end{figure}
 
-\section{Spatial Associations and Trend Detection}
+\subsection{Spatial Regression}
+
+Regression has the goal of modeling the relationship between a target variable and a (set of) independent variable(s). The difference with interpolation is that in the latter, only the target variable data and the spatial coordinates are used, while in regression there is information about other non-spatial attributes to make predictions.
+
+Spatial regression extends the typical regression method to include information about a point's neighborhood:
+\begin{equation*}
+    (P_i) = \underbrace{\alpha + \beta X_i + \epsilon_i}_{\parbox{7.5em}{\scriptsize\centering Standard regression model}} + \underbrace{\delta \sum_j w_{ij} X_j}_{\parbox{7.5em}{\scriptsize\centering Summary information about neighbors}}
+\end{equation*}
+
+\section{Co-location Pattern Mining}
+
+Co-location pattern mining is the process of finding subsets of spatial features whose instances are frequently located together in space. It is similar to traditional frequent itemset mining, although defining ``transactions'' is not as immediate, since there is no explicit way to isolate instances into groups.
+
+Given:
+\begin{itemize}
+    \item A set of features $F = \{f_1, \dots, f_m\}$;
+    \item A set of instances $O = \{o_1, \dots, o_n\}$;
+    \item A neighbor relation $R$ between pairs of instances, s.t. $R(o_1, o_2) \iff d(o_1, o_2) < \textit{thresh.}$; 
+\end{itemize}
+a \textbf{co-location pattern} $CL = \{f_1, \dots, f_k\} \subseteq F$ is a subset of features, and an \textbf{instance of a pattern} $I = \{o_1, \dots, o_k\} \subseteq O$ is a subset of objects s.t.:
+\begin{itemize}
+    \item For each $f \in F$, there is exactly one object $o \in O$ of type $f$, anc vice versa;
+    \item $I$ forms a clique w.r.t. $R$ (i.e., all pairs of objects are connected to each other).
+\end{itemize}
+A co-location pattern that contains $k$ spatial features is called size-$k$ co-location pattern.
+
+To measure the prevalence of a given pattern, we use two measures; the \textbf{participation ratio} (of a feature within a pattern):
+\begin{equation*}
+    PR(CL, f_i) = \frac{\#|\pi_{f_i} (\textit{instances(CL)})|}{\#|\textit{instances(CL)}|}
+\end{equation*}
+and the \textbf{participation index} (of the entire pattern):
+\begin{equation*}
+    PI(CL) = \min_{i=1}^k PR(CL, f_i)
+\end{equation*}
+A co-location pattern is called \textbf{prevalent} if its partecipation index is greater or equal than a given threshold \textit{minprev}. The participation index is anti-monotone, which means that the participation index of a co-location pattern is always lower or equal to that of its sub-patterns.
+
+\section{Trend Detection}
+
+Spatial trend analysis is the process of finding patterns of change of non-spatial attributes in the neighborhood of some object in the study area. It is analogous to trend analysis in time series, but applied to spatial data, where the linear direction of time is replaced by the many possible paths that can be formed in space. The most notable paths of interest usually start from a common location (e.g., a city center), have meaningful shape, and show a statistically significant trend.
+
+Let $g$ be the neighborhood graph that represents all the neighborhood relationships among objects in the study area. Let $o$ be one such object, which is considered the starting point of paths. Let $a$ be a subset of all non-spatial attributes, in which paths must be found in. Let $t$ be a type of function (e.g., linear, exponential) used for regression. Then, the goal of spatial trend detection is to discover the set of all neighborhood paths in $g$, starting from $o$, having a trend of type $t$ in attributes $a$, with a correlation greater or equal to a given threshold \textit{minconf}.
+
+To isolate these relevant paths, special filters are used to select subsets of all paths. There are many ways to define such filters; some examples are reported in Fig \ref{fig:trend_filters}.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\textwidth]{img/trend_filters.png}
+    \caption{Examples of possible filters. The \textit{stralike} filter allows paths that deviate in a specific diagonal direction; the \textit{variable starlike} filter allows paths that can deviate diagonally multiple times; the \textit{vertical starlike} filter restricts horizontal deviations in favor of vertical ones.}
+    \label{fig:trend_filters}
+\end{figure}
