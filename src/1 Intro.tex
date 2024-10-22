@@ -12,6 +12,12 @@ The system used to locate points on Earth is called \textbf{geographic coordinat
 \textbf{Meridians} are lines of equal longitude. The prime meridian passes through Greenwich, England, and corresponds to 0°. \textbf{Parallels} are lines of equal latitude. The equator is the line corresponding to 0° latitude.
 
 In a \textbf{plane coordinates} system, longitute and latitude correspond to x and y coordinates respectively. Logitude takes positive values in the easter hemisphere, and negative values in the western hemisphere; latitude takes positive values north of the equator, and negative values south of the equator.
+\begin{figure}[!ht]
+    \centering
+    \includesvg[width=1.0\textwidth]{img/lat_lon_earth.svg}
+    \caption{Latitude and longitude.}
+    \label{fig:lat-lon-earth}
+\end{figure}
 \\
 Longitute and latitude values may be expressed in different ways:
 \begin{itemize}
@@ -288,7 +294,7 @@ Spatial trend analysis is the process of finding patterns of change of non-spati
 Let $g$ be the neighborhood graph that represents all the neighborhood relationships among objects in the study area. Let $o$ be one such object, which is considered the starting point of paths. Let $a$ be a subset of all non-spatial attributes, in which paths must be found in. Let $t$ be a type of function (e.g., linear, exponential) used for regression. Then, the goal of spatial trend detection is to discover the set of all neighborhood paths in $g$, starting from $o$, having a trend of type $t$ in attributes $a$, with a correlation greater or equal to a given threshold \textit{minconf}.
 
 To isolate these relevant paths, special filters are used to select subsets of all paths. There are many ways to define such filters; some examples are reported in Fig \ref{fig:trend_filters}.
-\begin{figure}
+\begin{figure}[!ht]
     \centering
     \includegraphics[width=0.75\textwidth]{img/trend_filters.png}
     \caption{Examples of possible filters. The \textit{stralike} filter allows paths that deviate in a specific diagonal direction; the \textit{variable starlike} filter allows paths that can deviate diagonally multiple times; the \textit{vertical starlike} filter restricts horizontal deviations in favor of vertical ones.}
