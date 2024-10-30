@@ -1,0 +1,134 @@
+\chapter{Data Preprocessing}
+
+Data that represents trajectories of moving entities is often affected by errors. Their presence can greatly influence the result of analysis, so it is important to identify and remove them. Additionally, datasets tend to contain huge amounts of objects, meaning that the time and space complexity that may bee too high. Finally, individual trajectories that are too long and complex may cause the failure of data mining algorithms due to the inability of extracting details from them. Summarizing the information carried by trajectories via a preprocessing phase is a necessary step to make sure subsequent analysis can be carried out efficiently and effectively.
+
+Preprocessing techniques can be divided into two families: context-based filtering, and movement-based filtering. \textbf{Context-based filtering} relies on contextual geographical information provided by the environment, such as road networks, to remove points that are deemed to be errors. These methods may not always be effective, since they assume that trajectories must always be on a road (or adapt in some way to the available data); this may not always be true, for example for vehicles moving across the sea or open fields, or for pedestrians. \textbf{Movement-based filtering} uses only the geometry and dynamics of the movement described by the trajectory to find points that do not match the expected behaviour of the moving entity.
+
+\section{Movement-based Filtering}
+
+\subsection{Speed-based Filtering}
+
+This filtering is based on the idea that tha speed of the moving entity must always be within a certain range of allowed values, without any abrupt change. Initially, the first point of the trajectory is found and set as valid; then, each subsequent point is scanned in order according to the timestamp, and the speed $v$ between the current and the previous point is calculated:
+\begin{itemize}
+    \item If $v$ is larger than a given threshold, the point is marked as invalid and removed from the trajectory;
+    \item If $v$ is within the threshold, the point is marked as valid and kept.
+\end{itemize}
+
+\begin{figure}[!ht]
+    \centering
+    \includesvg[width=0.70\textwidth]{img/filtering_speed.svg}
+    \caption{Example of speed-based filtering: point \textit{e} is removed from the trajectory as it would imply a speed higher than the threshold.}
+    \label{fig:filtering-speed}
+\end{figure}
+
+\section{Context-based Filtering}
+
+\subsection{Point Map Matching}
+
+Map matching is the procedure of determining which road on a map a vehicle is using, given a set of GPS points. This approach both filters out noise and outliers, and adds new information to the dataset by associating each point with an identifier of the road it is matched to. Once points have been mapped to a specific road, any point farther than a certain threshold can be removed as noise.
+
+The main issues of this approaches are:
+\begin{itemize}
+    \item Projecting individual points requires a comparison for each point and each road segment, which can be computationally expensive;
+    \item In some cases, the same point could be potentially assigned to multiple road segments, but limiting ourselves to consider the closest one may not always be the best choice;
+    \item Matching points individually can lead to inconsistencies, especially when the road network is very dense.
+\end{itemize}
+
+\subsection{Route Reconstruction and Trajectory Map Matching}
+
+\paragraph{Route Reconstruction}
+Route reconstruction tries to infer the path taken by a moving entity by connecting the available points and possibly creating new ones; this technique is useful in cases where data is generally sparse or has large missing gaps. Usually, we assume the entity always takes the shortest (or best) path between two consecutive points; if an area allows free movement, the entity is assumed to move in a straight line. If there are limitations, such as the presence of buildings, the path must adapt to them. Since we often have attributes describing the characteristics of roads, the optimal path can be found by trying to maximize or minimize certain features: the total path duration in time, fuel consumption, $CO_2$ emissions, etc.
+
+Common algorithms used for route reconstruction are \textbf{Dijkstra's minimum cost path algorithm}, which is efficient and can handle cycles, although it requires non-negative costs, and \textbf{Bellman-Ford's algorithm}, which is less efficient and can't handle cycles, but allows negative costs.
+
+\paragraph{Trajectory map matching}
+This is a more advanced version of point map matching that takes as input a whole trajectory (wheter it comes from raw data or from a reconstruction step), and adapts it to a road network considering spatial, temporal, and contextual constraints for the whole path. Common approaches are shortest-path based, and probability-based.
+
+\textbf{Shortest-path based Map Matching} starts by matching only the first and last point of the path to the road segments, as in point map matching, and then finding the optimal path that connects them. A threshold is set as the maximum distance allowed between a segment and a GPS point for the two to be considered matching; using this threshold, \textbf{cutting points} are found. A cutting point can be of two types: the first type is the point that is the farthest from the current optimal path, and the second type are the points whose distance fall within the threshold. If a cutting point of the first type is found, the path is split in two, and a new optimal path that passes by that point is found. These steps run recursively on each half until all the points are reasonably close to the optimal path.
+
+\textbf{Probability-based Map Matching} considers the probability that an entity may move from one road segment to another. State-of-the-art implementations use Hidden Markov Models to model the trajectory as a sequence of state transitions.
+
+\section{Trajectory Simplification}
+
+Many algorithms on trajectories tend to be very expensive, and their complexity is tied to the number of points in the dataset. Trajectory simplification is used to reduce the number of points without affecting the quality of results. Typical cases in which simplification can be used are for straight line movement (the entity keeps moving in a straight line, so the whole trajectory/subtrajectory can be represented as a single segment), or negligible movement (the entity stays still for some time, accumulating GPS traces in the same spot). Some standard methods for polygonal curve simplification include Ramer-Douglas-Peucker, and Driemel-HarPeled-Wenk.
+
+\textbf{Ramer-Douglas-Peucker} is one of the most successful simplification algorithms, used in many fields other than GIS, such as computer vision and pattern recognition. A pseudocode of the algorithm is found below.
+\begin{algorithm}
+\caption{Ramer-Douglas-Peucker pseudocode.} 
+\begin{algorithmic}[1]
+    \Function{RamerDouglasPeucker}{$P, \varepsilon, p_i, p_j$} \Comment{$P = \langle p_1, \dots, p_n \rangle$}
+    
+    \State Find vertex $p_f \in \langle p_i, \dots, p_j \rangle$ farthest from the line $p_i p_j$.
+        
+    \State $\textit{dist} \gets$ distance between $p_f$ and $p_i p_j$.
+
+    \If{$\textit{dist} < \varepsilon$}
+        \State \Call{RamerDouglasPeucker}{$P,p_i,p_f$}
+        \State \Call{RamerDouglasPeucker}{$P,p_f,p_j$}
+    \EndIf
+
+    \State Return line $p_i p_j$.
+    \EndFunction
+\end{algorithmic}
+\end{algorithm} \\
+The time complexity is $T(n) = O(n) + T(n-1) = O(n^2)$ in the worst case, but it is usually much faster in practice.
+\begin{figure}[!ht]
+    \centering
+    \includesvg[width=0.80\textwidth]{img/RDP.svg}
+    \caption{Example of one step Ramer-Douglas-Peucker simplification.}
+    \label{fig:ramer-douglas-peucker}
+\end{figure}
+
+
+\textbf{Driemel-HarPeled-Wenk} is not recursive, unlike the previous, but instead simplifies the line starting from the very first point and iteratively removes points that fall within a certain radius from the current one, substituting all of them with a single line that goes from the current point to the first point in the trajectory more distant than that radius. The pseudocode is below.
+\begin{algorithm}
+\caption{Driemel-HarPeled-Wenk pseudocode.}
+\begin{algorithmic}[1]
+    \Function{DriemelHarPeledWenk}{$P, \varepsilon$} \Comment{$P = \langle p_1, \dots, p_n \rangle$}
+    
+    \State $P' \gets p_1$.
+    \State $i \gets 1$.
+    
+    \While{$i \leq n$}
+        \State $\textit{curr} \gets p_i$.
+        \State $j \gets i+1$.
+        \While{$\textit{dist}(p_i, p_j \leq \varepsilon)$}
+            \State $j \gets j+1$.
+            \If{$j > n$}
+                \State $i \gets n$.
+                \State Break. 
+            \EndIf
+        \EndWhile
+        \State Add $p_j$ to $P'$.
+    \EndWhile
+
+    \State Return $P'$.
+    \EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+Either way, simplification has the side effect of modifying average speed estimates, as simpler, straighter paths imply a slower average speed compared to more complex, chaotic ones.
+
+\section{Stop Detection for Trajectory Segmentation}
+
+GPS data is normally formed by a continuous stream of points, but there is no explicit separation between the trajectories of the same entity. \textbf{Stop detection} is a technique used to identify moments in which the entity is staying still (or moving very slowly) to be used as endpoints of different trajectories. For example, if we consider a person moving through a regular work day, we may observe that person move away from a spot (likely his/her house), then stop at what is either school or work, then make another stop at the gym, and finally return back home. Every movement between each of these stops can be isolated as its own trajectory.
+
+The general criteria is: the estimated speed from a set of points is very low (i.e., very little movement over a long time interval), the set of points represent a stop. The sequence of points between stops is a trajectory. To check if a point belongs to a stop, typical space and time thresholds are $Th_S \in [50, 250]$ (meters), and $Th_T \in [1, 20]$ (minutes), but depending on the context, these values may change: thresholds for a car are different from those for a pedestrian, for example.
+
+When it comes to vehicles specifically, stops can often be detected by simply checking when the engine is on or off. This is generally good, but may not detect stops that are very short. A more general approach is to use a density-based approach: the faster an entity is, the less of its own points are found around it as it is moving. 
+
+After trajectory segmentation has been performed, we can use them to study the behaviour of the individual, and eventually find deviations from the norm. A way to represent this information is building the entity's \textbf{Individual Mobility Graph}, where each location is a node and each movement is an edge; this means that for each trajectory, only the starting and ending locations are recorded in the graph. Naturally, denser areas with more nodes will represent important places. These locations are identified using a clustering algorithm, and are each associated with their frequency; trips between points belonging to the same cluster (location) are then aggregated as edges between the entire clusters. The basic assumption is that the location with the highest frequency is home, the second most frequent location is work, and so on. An alternative approach also considers the actual time of the day the traces were recorded at: points recorded during nighttime or early morning are more likely to be home, while those recorded during the morning and early afternoon are more likely to be work.
+
+Other than GPS, phone data can also be used to infer important locations. By analyzing the calls and messages sent or received by the user, we can identify what are called \textbf{personal anchor points}, which are the most frequently contacted antennas. These points can also be labeled as home/work by considering the time of the day the calls were made or received.
+
+\section{Activity Labeling}
+
+After locations have been identified, an ulterior step is to assign to each of them a specific activity the user carries out once it arrives there. The first step is to assign a location to a set of actual point of interest that are close by. The POIs are then also associated with an activity, for example: ``eating out'', ``shopping'', ``working'', ``education''. At the end, the available data will be:
+\begin{itemize}[itemsep=-5pt, label=-]
+    \item For each POI, the category, the opening hours, the location;
+    \item For each trajectory, the stop location, the stop duration, the time of day;
+    \item For each user, the max walking distance (as in, how far the person is likely to walk after parking).
+\end{itemize}
+Each POI is associated to a certain probability of being the reason for the stop, calculated as a function of the information above. Finally, a stop is annotated with the activities and relative probabilities of the POIs close by.
+
+
