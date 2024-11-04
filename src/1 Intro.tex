@@ -30,11 +30,11 @@ As mentioned before, planet Earth can be approximated as an \textbf{ellipsoid}: 
 
 A \textbf{datum} is a mathematical model of the Earth which is used as the reference to calculate the geographic coordinates of a point (or even the elevation, if we consider vertical datums). A datum is defined as: the pair \textit{longitude, latitude} of coordinates of an initial point wich will be the origin, an ellipsoid, and the separation of the ellipsiod and the Earth at the origin.
 
-Distances on the Earth's surface are not straight lines; they are instead represented by \textbf{geodesics}: through any two points (not antipodal), there is exactly one ``great circle'' that connects them. The two points separate the great circle in two parts: the shorter of the two is their geodesic distance. Since the Earth is nearly spherical, geodesic distances are correct with an error up to $0.5\%$. The geodesic distance between points $A$ and $B$ is calculated as:
+Distances on the Earth's surface are not straight lines; they are instead represented by \textbf{geodesics}: through any two points (not antipodal), there is exactly one ``great circle'' that connects them. The two points separate the great circle in two parts: the shorter of the two is their geodesic distance. Since the Earth is nearly spherical, geodesic distances are correct with an error up to $0.5\%$. The geodesic distance between points $A$ and $B$ is calculated using the \textbf{spherical law of cosines}:
 \begin{equation*}
     \cos(d) = \sin(\textit{lat}_A) \sin(\textit{lat}_B) + \cos(\textit{lat}_B) + cos(\textit{lon}_A - \textit{lon}_B),
 \end{equation*}
-where $d$ is the angular distance between the two points.
+where $d$ is the angular distance between the two points. To convert $d$ to a linear distance measure, it can be multiplied by 111.32 km, which is the length of 1 degree at the equator. This formula is the basis from which the \textbf{haversine formula} is derived.
 
 \section{Trajectories, Tessellations, Flows}
 

@@ -1,0 +1,62 @@
+\titleformat{\paragraph}[runin]{\normalfont\normalsize\bfseries\color{Maroon}}{}{0em}{}
+
+\chapter{Useful Tools and Libraries}
+
+\section{File Formats}
+\paragraph{Shapefile}
+Popular geospatial vector data format for GIS software. It can describe any vector feature using points, lines, and polygons. The format is actually composed of multiple files, but the shapefile itself has the filename extension \texttt{.shp}.
+
+Specifies axis coordinates assuming a Cartesian coordinate system, using the ordering $(x,y)$: $x$ is longitude, and $y$ is latitude.
+
+\section{Python Libraries}
+\paragraph{Shapely}
+Used to analyze and perform set operations on planar geometric objects. Represents objects as either \texttt{Point}s, \texttt{LineString}s, or \texttt{Polygon}s.
+\begin{itemize}[itemsep=-5pt, label=-]
+    \item \texttt{Points} can be 2- or 3-dimensional, and is defined from a coordinate tuple.
+    \item \texttt{LineString} is built from a list of at least two coordinate tuples.
+    \item \texttt{Polygon} is a filled area; must be defined by at least three coordinate tuples that speciy the outer perimeter, and optionally a list of inner holes.
+\end{itemize}
+Various attributes can be directly accessed from an instantiated object to analyze them (e.g., length, centroid, area, bounding box, etc.). For each of these types, a \texttt{Multi}- variant exists, used to have collections of objects of the same type.
+
+\paragraph{GeoPandas}
+Extends the datatypes used by pandas to allow spatial operation on geometric types. It's built on top of Shapely for geometric opeations. Its main data structures are \texttt{GeoSeries} and \texttt{GeoDataFrame}, which respectively extend pandas' \texttt{Series} ad \texttt{DataFrame} types. One constraint is that a \texttt{GeoDataFrame} must contain a \texttt{geometry} column that specifies the geometry of the objects held in the dataframe; this column must be of type \texttt{GeoSeries}. The \texttt{.plot()} function (built on top of matplotlib's \texttt{.plot()}) can be used to easily visualize geometric data on a 2D map. Supports the shapefile data format, with methods for reading (\texttt{read\_file()}) and writing (\texttt{to\_file()}) shapefiles.
+
+The main operations that can be performed on \texttt{GeoDataFrame}s are spatial joins: the method used is \texttt{.sjoin()}, where parameter \texttt{how} accepts a string that specifies the type: \texttt{"left"}, \texttt{"right"}, or \texttt{"inner"}. The direction refers to the dataframe on which the method is called; for example:
+\begin{center}
+    \texttt{df1.sjoin(df2, how="left")}
+\end{center}
+performs a join that preserves all the rows of \texttt{df1}.
+
+\paragraph{Scipy}
+General library for scientific computing. Contains the module \texttt{scipy.spatial} that provides spatial algorithms and data structures. Provides a \texttt{cKDTree} class that implements efficient methods for nearest-neighbor calculations in spatial data.
+
+\paragraph{Scikit-Learn}
+The most popular machine learning library in Python. \\
+Its \texttt{KNeighborRegressor} class can be used to perform k-NN regression on spatial data.
+
+\paragraph{Scikit-Mobility}
+Library for human mobility analysis. The library manages mobility data of various formats (CDR, GPS, social media data, etc.), and can represent trajectories and mobility flows using the data structures \texttt{TrajDataFrame} adn \texttt{FlowDataFrame}, respectively.
+
+\paragraph{NetworkX}
+Package for creation and manipulation of complex networks. Has implementations of many graph algorithms. Useful to operate on street networks, since they are usually represented as graphs with arbitrary attributes on nodes/edges.
+
+\paragraph{OSMnx}
+Package used to download, model, and visualize street networks from OpenStreetMap. It can retrieve walking, driving, and biking networks, as well as points of interests, transit stops, street orientations, travel time, elevation data, and routing. It contains several methods that automatically download data by providing some spatial reference; for example, \texttt{graph\_from\_address()} downloads and returns the desired type of network within some distance to a specific provided address; \texttt{graph\_from\_point()} is similar to the previous, but downloads the network centered around a point expressed as a tuple \textit{(lat, lon)}; \texttt{graph\_from\_bbox()} allows the user to specify a bounding box to download the network within.
+
+\paragraph{Geovoronoi}
+Can create and plot voronoi tessellations. Has a main function called \texttt{voronoi\_regions\_from\_coords()}, which takes as input a list of coordinates representing the centroids of the cells and an area to bound the cells, and returns a list of polygons representing the tessellation. It uses Scipy to perform the tessellation, and Shapely to cut the edge polygons to fit into the provided shape (since they would be otherwise infinite).
+
+\paragraph{PySal}
+Provides various methods for spatial analysis. It has four main modules:
+\begin{itemize}[itemsep=-5pt, label=-]
+    \item \texttt{Lib} contains the core spatial data structure and file IO functionalities;
+    \item \texttt{Explore} contains methods for exploratory analisys. It contains the subpackage \texttt{esda}, which provides specific methods for spatial autocorrelation (Moran's I, Geary's C);
+    \item \texttt{Model} contains different models to estimate spatial relationships, both linear and non-linear;
+    \item \texttt{Viz} contains visualization tools.
+\end{itemize}
+
+\paragraph{Pykrige}
+Implements various kriging algorithms, both for 2D and 3D data.
+
+\section{Links}
+\href{https://opencellid.org}{opencellid.org} - World's largest open database of cell towers.
