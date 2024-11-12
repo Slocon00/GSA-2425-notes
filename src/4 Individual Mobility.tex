@@ -1,0 +1,72 @@
+\chapter{Individual and collective human mobility}
+
+Human mobility refers to the movement in space and time of human beings. Individual mobility is the movement of a single person, while collective mobility is the movement of a group of people. In this chapter, a few basic concepts about human mobility are introduced: the laws of individual human mobility, abd the techniques used to model it.
+
+\section{Individual Human Mobility}
+
+\section{Metrics}
+
+\paragraph{Travel Distance (Jump Length)}
+
+Travel distance is the distance between two consecutive locations visited by the individual. Travel distance may also be called in different ways depending on the context it is used in; the term ``jump length'' is is used to refer to different appearances of the same object in different locations, without necessarily implying a direct movement between them. An early example of mobility analysis involved information about the spatial trajectories of bank-notes. The data was sourced from a US-based website where users could input the identifier of their dollar bills, specifying where they are located. In this sense, the distance between two different locations in which a bank-note appears in is a jump length.
+
+Regardless of how it is defined, distance, denoted as $\Delta r$, is calculated as
+\begin{equation*}
+    \Delta r = \| r(t) - r(t + dt) \|_2
+\end{equation*}
+i.e., the Euclidean distance between the locations recorded at intervals $t$ and $t + dt$. It is interesting to study the distribution of $\Delta r$ within a population, approximating the probability distribution function of distances/jump lengths, $P(\Delta r)$. Empirical studies observed how this distribution follows a \textit{power-law}: a scale-free distribution (i.e., with no/meaningless mean) with a heavy tail:
+\begin{equation*}
+    P(r) \sim r^{-(1+\beta)}
+\end{equation*}
+where $\beta$ is the scaling exponent, which is chosen depending on the context.
+\begin{figure}[H]
+    \centering  
+    \includesvg[width=0.75\textwidth]{img/zipf.svg}
+\end{figure}
+Power law behaviour has been observed in the trajectories of mobile phone users as well, specifically following a truncated power law:
+\begin{equation*}
+    P(r) = (r + r_0)^{-\beta} \exp(-r/\kappa)
+\end{equation*}
+where $r_0$ and $\kappa$ are the cutoffs of smaller and larger values of $\Delta r$.
+
+What this means is that there are a lot of individuals who tend to move short distances; as the distance increases, the number of individual sharply decreases. However, there are still a few individuals who move very long distances (the distribution is not exponential).
+
+\paragraph{Radius of Gyration}
+Humans tend to habitually move a characteristic distance away from their starting locations. This distance can be quantified by the radius of gyration, $r_g$, defined as the root mean square distance of a set of points:
+\begin{equation*}
+    r_g = \sqrt{\frac{\sum_{i=1}^{N} \| r_i - r_{\textit{cm}} \|^2}{N}}
+\end{equation*}
+where $r_i$ are the coordinates of the $N$ individual locations the person visited, and $r_{\text{cm}}$ is the center of mass of the set of points (their centroid):
+\begin{equation}
+    r_{\textit{cm}} = \frac{\sum_{i=1}^{N} r_i}{N} 
+\end{equation}
+It was observed that the distribution of the radii of gyration of a population of individuals also follows a truncated power law.
+\begin{figure}[H]
+    \centering
+    \includesvg[width=0.75\textwidth]{img/rog.svg}
+    \caption{Radii of gyration of two different individuals. The red circle indicates their house, while the blue circles are the locations they visited.}
+\end{figure}
+What can be observed from data is that people with a small radius of gyration tend to travel mostly over small distances, while those with a large radius tend to have a combination of a lot of short travels and a few long ones.
+
+An interesting aspect to consider is the phenomenon of \textbf{saturation}, observed during the temporal evolution of $r_g$; the average $r_g$ of a person shows a logaritmic increase with time, which can be attributed to the fact that people tend to follow regular travel patterns and after a certain amount of time, they have visited all the places they usually go to, leading to a stable $r_g$.
+
+By itself, the radius of gyration does not carry any information about the relevance of a certain location in an individual's movements. An individual who spends most of his/her time in his/her most visited locations (e.g., home and work) will have a large $r_g$ if the two are far away; if instead they are close to each other, the $r_g$ may still be large, since there are likely other longer movements that contribute to the radius of gyration. To address this issue, one can consider the frequency of visits to a location, ranking them accordingly, and then calculate the \textbf{$k$-radius of gyration}:
+\begin{equation*}
+    r_g^{(k)} = \sqrt{\frac{\sum_{j=1}^k n_j (r_j - r_{\textit{cm}^{(k)}})^2}{N_k}}
+\end{equation*}
+where $N_k$ is the number of visits to the $k$ most frequented locations, $r_{\text{cm}}^{(k)}$ is the centroid of those top $k$ locations, and $n_j$ is the number of visits to the $j^{\textit{th}}$ location. The frequency of visits also follows a power law distribution, since people will devote most of their time to few places (home, work, school, etc.), and less and less time to others.
+
+The analysis of CDR and GPS traces revealed that there are two distinct groups of individuals: the \textit{k-returners}, whose radius of gyration is well approximated by their k-radius of gyration for $k \geq 2$, and the \textit{k-explorers}, whose k-radius is very small compared to their overall $r_g$.
+
+\subsection{Predictability}
+A way to represent the movements of an individual is by constructing its \textbf{individual mobility network}, i.e., a graph where each node is a visited location and an edge is a movement between them. A measure that can be calculated on this network to quantify how predictable the movements are is \textbf{entropy}:
+\begin{align*}
+    &S^{\textit{rand}} = \log_2 N &\text{(Random entropy)} \\
+    &S^{\textit{unc}} = - \sum_{i=1}^n p_i \log_2 p_i &\text{(Uncorrelated entropy)} \\
+    &S = -\sum_{T_i' \subset T_i} p_{T_i'} \log_2 p_{T_i'} &\text{(Real entropy)}
+\end{align*}
+Random entropy assumes that each location is visited with equal probability. (Temporal) Uncorrelated entropy assumes heterogeneous visitation patterns, associating each term in the sum with the probability it was visited by the user. Real entropy depends not only on the frequency of visitation, but also on the order in which nodes were visited and the time spent at each of them: $T_i = \{X_1, \dots, X_n\}$ is a sequence of locations at which the user is observed at a certain time interval.
+
+
+\section{Collective Human Mobility}
+
