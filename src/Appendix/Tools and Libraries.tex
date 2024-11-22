@@ -8,6 +8,9 @@ Popular geospatial vector data format for GIS software. It can describe any vect
 
 Specifies axis coordinates assuming a Cartesian coordinate system, using the ordering $(x,y)$: $x$ is longitude, and $y$ is latitude.
 
+\paragraph{GeoJSON}
+Open format used to describe collections of spatial objects using JSON. Possible geometries are points, lines, polygons, and collections of these types. It uses the filename extension \texttt{.geojson} or \texttt{.json}.
+
 \section{Python Libraries}
 \paragraph{Shapely}
 Used to analyze and perform set operations on planar geometric objects. Represents objects as either \texttt{Point}s, \texttt{LineString}s, or \texttt{Polygon}s.
@@ -35,7 +38,7 @@ The most popular machine learning library in Python. \\
 Its \texttt{KNeighborRegressor} class can be used to perform k-NN regression on spatial data.
 
 \paragraph{Scikit-Mobility}
-Library for human mobility analysis. The library manages mobility data of various formats (CDR, GPS, social media data, etc.), and can represent trajectories and mobility flows using the data structures \texttt{TrajDataFrame} adn \texttt{FlowDataFrame}, respectively.
+Library for human mobility analysis. The library manages mobility data of various formats (CDR, GPS, social media data, etc.), and can represent trajectories and mobility flows using the data structures \texttt{TrajDataFrame} and \texttt{FlowDataFrame}, respectively. A \texttt{TrajDataFrame} requires three columns: latitude, longitude, and datetime, while a \texttt{FlowDataFrame} requires three columns: origin, destination, and flow.
 
 \paragraph{NetworkX}
 Package for creation and manipulation of complex networks. Has implementations of many graph algorithms. Useful to operate on street networks, since they are usually represented as graphs with arbitrary attributes on nodes/edges.

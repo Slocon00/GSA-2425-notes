@@ -1,0 +1,204 @@
+\chapter{Individual and collective human mobility}
+
+Human mobility refers to the movement in space and time of human beings. Individual mobility is the movement of a single person and is represented by trajectories, while collective mobility is the movement of groups of people, and is represented by flows.  In this chapter, a few basic concepts about human mobility are introduced: the laws of individual human mobility, abd the techniques used to model it.
+
+\section{Individual Human Mobility}
+
+\section{Metrics}
+
+\paragraph{Travel Distance (Jump Length)}
+
+\textbf{Travel distance} is the distance between two consecutive locations visited by the individual. Travel distance may also be called in different ways depending on the context it is used in; the term \textbf{``jump length''} is is used to refer to different appearances of the same object in different locations, without necessarily implying a direct movement between them. An early example of mobility analysis involved information about the spatial trajectories of bank-notes. The data was sourced from a US-based website where users could input the identifier of their dollar bills, specifying where they are located. In this sense, the distance between two different locations in which a bank-note appears in is a jump length.
+
+Regardless of how it is defined, distance, denoted as $\Delta r$, is calculated as
+\begin{equation*}
+    \Delta r = \| r(t) - r(t + dt) \|_2
+\end{equation*}
+i.e., the Euclidean distance between the locations recorded at intervals $t$ and $t + dt$. It is interesting to study the distribution of $\Delta r$ within a population, approximating the probability distribution function of distances/jump lengths, $P(\Delta r)$. Empirical studies observed how this distribution follows a \textit{power-law}: a scale-free distribution (i.e., with no/meaningless mean) with a heavy tail:
+\begin{equation*}
+    P(r) \sim r^{-(1+\beta)}
+\end{equation*}
+where $\beta$ is the scaling exponent, which is chosen depending on the context.
+\begin{figure}[H]
+    \centering  
+    \includesvg[width=0.75\textwidth]{img/zipf.svg}
+\end{figure}
+Power law behaviour has been observed in the trajectories of mobile phone users as well, specifically following a truncated power law:
+\begin{equation*}
+    P(r) = (r + r_0)^{-\beta} \exp(-r/\kappa)
+\end{equation*}
+where $r_0$ and $\kappa$ are the cutoffs of smaller and larger values of $\Delta r$.
+
+What this means is that there are a lot of individuals who tend to move short distances; as the distance increases, the number of individual sharply decreases. However, there are still a few individuals who move very long distances (the distribution is not exponential).
+
+\paragraph{Radius of Gyration}
+Humans tend to habitually move a characteristic distance away from their starting locations. This distance can be quantified by the radius of gyration, $r_g$, defined as the root mean square distance of a set of points:
+\begin{equation*}
+    r_g = \sqrt{\frac{\sum_{i=1}^{N} \| r_i - r_{\textit{cm}} \|^2}{N}}
+\end{equation*}
+where $r_i$ are the coordinates of the $N$ individual locations the person visited, and $r_{\text{cm}}$ is the center of mass of the set of points (their centroid):
+\begin{equation}
+    r_{\textit{cm}} = \frac{\sum_{i=1}^{N} r_i}{N} 
+\end{equation}
+It was observed that the distribution of the radii of gyration of a population of individuals also follows a truncated power law.
+\begin{figure}[H]
+    \centering
+    \includesvg[width=0.75\textwidth]{img/rog.svg}
+    \caption{Radii of gyration of two different individuals. The red circle indicates their house, while the blue circles are the locations they visited.}
+\end{figure}
+What can be observed from data is that people with a small radius of gyration tend to travel mostly over small distances, while those with a large radius tend to have a combination of a lot of short travels and a few long ones.
+
+An interesting aspect to consider is the phenomenon of \textbf{saturation}, observed during the temporal evolution of $r_g$; the average $r_g$ of a person shows a logaritmic increase with time, which can be attributed to the fact that people tend to follow regular travel patterns and after a certain amount of time, they have visited all the places they usually go to, leading to a stable $r_g$.
+
+By itself, the radius of gyration does not carry any information about the relevance of a certain location in an individual's movements. An individual who spends most of his/her time in his/her most visited locations (e.g., home and work) will have a large $r_g$ if the two are far away; if instead they are close to each other, the $r_g$ may still be large, since there are likely other longer movements that contribute to the radius of gyration. To address this issue, one can consider the frequency of visits to a location, ranking them accordingly, and then calculate the \textbf{$k$-radius of gyration}:
+\begin{equation*}
+    r_g^{(k)} = \sqrt{\frac{\sum_{j=1}^k n_j (r_j - r_{\textit{cm}^{(k)}})^2}{N_k}}
+\end{equation*}
+where $N_k$ is the number of visits to the $k$ most frequented locations, $r_{\text{cm}}^{(k)}$ is the centroid of those top $k$ locations, and $n_j$ is the number of visits to the $j^{\textit{th}}$ location. The frequency of visits also follows a power law distribution, since people will devote most of their time to few places (home, work, school, etc.), and less and less time to others.
+
+The analysis of CDR and GPS traces revealed that there are two distinct groups of individuals: the \textit{k-returners}, whose radius of gyration is well approximated by their k-radius of gyration for $k \geq 2$, and the \textit{k-explorers}, whose k-radius is very small compared to their overall $r_g$.
+
+\subsection{Predictability}
+A way to represent the movements of an individual is by constructing its \textbf{individual mobility network}, i.e., a graph where each node is a visited location and an edge is a movement between them. A measure that can be calculated on this network to quantify how predictable the movements are is \textbf{entropy}:
+\begin{align*}
+    &S^{\textit{rand}} = \log_2 N &\text{(Random entropy)} \\
+    &S^{\textit{unc}} = - \sum_{i=1}^n p_i \log_2 p_i &\text{(Uncorrelated entropy)} \\
+    &S = -\sum_{T_i' \subset T_i} p_{T_i'} \log_2 p_{T_i'} &\text{(Real entropy)}
+\end{align*}
+Random entropy assumes that each location is visited with equal probability. (Temporal) Uncorrelated entropy assumes heterogeneous visitation patterns, associating each term in the sum with the probability it was visited by the user. Real entropy depends not only on the frequency of visitation, but also on the order in which nodes were visited and the time spent at each of them: $T_i = \{X_1, \dots, X_n\}$ is a sequence of locations at which the user is observed at a certain time interval.
+
+\subsection{Modeling}
+
+The \textbf{Exponential-preferential return} (\textbf{EPR}) model is based on two key mechanisms observed in human trajectories: \textit{exploration} and \textit{preferential return}. Most movements tend to frequently return to a few previously known locations (\textit{preferential return}), but every once in a while, the individual may decide to explore a new location (\textit{exploration}). This method models both the distance and the wait time between subsequent visits to the same location as a power law with exponential cutoff.
+
+The steps of the algorithm that generates the trajectories are the following:
+\begin{enumerate}
+    \item The individual starts at a random location, and the location's visit counter is initialized to 1. Since it's the initial point, its time of visit is set to 0.
+    \item The individual \textit{explores} a new location. First, the distance between the current location and the new one is extracted from a power law. Then, a random location is chosen at that distance: its visit counter is initialized to 1, while its time of visit is set to the previous location's visit time plus some value extracted from a power law (where small wait times are much more likely than large wait times).
+    \item After the new location has been added to the trajectory, the phase is randomly chosen between \textit{exploration} and \textit{return}.
+    \item If the phase is \textit{exploration}, another distance is chosen from a power law and a new location is added to the trajectory, again setting its counter to 1 and its visit time to the previous location's time plus a value extracted from a power law.
+    \item If the phase is \textit{return}, a previously visited location is chosen; the probability that a location is chosen as the return is proportional to the number of times it has already been visited in the past. Once visited, the location's visit time is incremented by 1 and its visit time is updated as before.
+    \item Steps 3-5 are repeated until the trajectory reaches the desired length.
+\end{enumerate}
+A variant of this model has been developed to also have a \textit{recency} return phase, where the return is not proportional to the number of previous visits, but to the visit time. When a return phase is chosen, the algorithm decides between a frequency based return with probability $\alpha$, or a recency based return with probability $1 - \alpha$, where $\alpha$ is chosen from empirical data.
+\begin{figure}[H]
+    \centering
+    \includesvg[width=0.70\textwidth]{img/EPR.svg}
+    \caption{Example of the two phases of the EPR model: the red dot is the current location, while the gray dots are previously visited locations. The size of the dots is proportional to the number of visits.}
+\end{figure}
+
+\section{Collective Human Mobility}
+
+Mobility information of individuals can be aggregated to study flows of individuals traveling from one location to another. These flows can be organized into a \textbf{Origin-Destination} (\textbf{OD}) matrix: each cell of indices $i,j$ contains the number of trips that start in the $i^{\text{th}}$ location and arrive in the $j^{\text{th}}$ location, quantifying the flow $T_{ij}$ of people between those two extremes. Locations are typically defined as tessellations of the space with a certain granularity, such as provinces, cities, neighborhoods, regions, states, etc. The OD matrix normally excludes self-loops, i.e., trips that start and end in the same location. From this matrix, we can derive the following:
+\begin{itemize}
+    \item \textbf{Total out-flow} from location $i$:
+    \begin{equation*}
+        O_i = \sum_j T_{ij}
+    \end{equation*}
+    \item \textbf{Total in-flow} to location $j$:
+    \begin{equation*}
+        D_j = \sum_i T_{ij}
+    \end{equation*}
+    \item \textbf{Total flow}:
+    \begin{equation*}
+        N = \sum_{ij} T_{ij}
+    \end{equation*}
+\end{itemize}
+
+There exist different models that can be used to infer/generate flows from OD matrices. The problem can be interpreted as a classification task, where locations are the classes: given a starting point, we want to predict which location is goind to be the ending point of the trip. Each model will estimate this probability from a different set of variables that characterize the locations, with the goal of maximizing the likelihood of the observed data. Models may also be \textbf{constrained} or \textbf{uncostrained}, imposing certain conditions on the flow matrix:
+\begin{align*}
+    &\sum_{ij} T_{ij} = N & \text{(Unconstrained/ globally constrained)} \\
+    &\sum_j T_{ij} = O_i \ \forall i &\text{(Origin constrained)} \\
+    &\sum_i T_{ij} = D_i \ \forall j &\text{(Destination constrained)} \\
+    &\sum_j T_{ij} = O_i \ , \ \sum_i T_{ij} = D_i &\text{(Doubly constrained)}
+\end{align*}
+Over time, two main schools of though have emerged: the first one assumes that the number of trips between two locations is inversely proportional to their distance (\textbf{gravity model}), while the other instead focuses on \textbf{intervening opportunities}, meaning that locations with a lot of opportunities of some kind (e.g., jobs, schooling, services, etc.) will attract more people.
+
+\subsection{Gravity Model}
+In the gravity model, the way mobility flows are calculated is inspired by Newton's law of universal gravitation:
+\begin{equation*}
+    T_{ij} \propto \frac{P_i P_j}{r_{ij}}
+\end{equation*}
+where $P_i$ and $P_j$ are the populations of locations $i$ and $j$, and $r_{ij}$ is the distance between them. This idea is generalized in the following equation:
+\begin{equation*}
+    T_{ij} = K m_i m_j f(r_{ij})
+\end{equation*}
+where $K$ is a constant, $m_i$ and $m_j$ are the masses of the two locations, which relate to the number of trips leaving $i$ and arriving in $j$ respectively, and $f(r_{ij})$ is the \textbf{friction factor}, a decreasing function of the distance (usually a power law or exponential function). The masses are typically modeled as:
+\begin{align*}
+   &m_i = P_i^{\alpha} & m_j = P_j^{\beta}
+\end{align*}
+where $\alpha$ and $\beta$ are the free  parameters of the model.
+
+This model is very popular, especially for transport planning and spatial economics. Still, it grossly simplifies flows and may not be able to capture empirical observations. Since it is trained on a dataset to adapt its parameters, it is also rather sensitive to fluctuations or incomplete data.
+
+Some issues can be solved using constrained versions of the model. The number of people arriving to or coming from a location can be fixed to a known quantity, and the model can be used to esitmate the other end of the flow:
+\begin{align*}
+    &T_{ij} = K_i O_i m_j f(r_{ij}) &K_{i} = \frac{1}{\sum_k m_k f(r_{ik})} \\
+    &T_{ij} = K_j m_i D_j f(r_{ij}) &K_{j} = \frac{1}{\sum_k m_k f(r_{kj})}
+\end{align*}
+Note that there is a different proportionality constant for each origin/destination. Alternatively, both origin and destination can be doubly constrained:
+\begin{align*}
+    &T_{ij} = K_i O_i L_j D_j f(r_{ij}) &K_i = \frac{1}{\sum_j L_j D_j f(r_{ij})} \,, \ \ L_j = \frac{1}{\sum_i K_i O_i f(r_{ij})}
+\end{align*}
+Choosing the right constrained or unconstrained model depends on the information available, and on the objective: if the goal is to approximate the flows from indirect socio-economic variables, unconstrained models are preferable; if instead we have out-going and/or in-going flows available, and the goal is to estimate the values of an OD matrix, constrained models are appropriate.
+
+\subsection{Intervening Opportunities Model}
+This model is based on the idea that movements across locations are not simply controlled by distance, but by th number of opportunities available. In the original paper this approach was first presented in, the author did not provide a precise definition of ``opportunity'', but it can be interpreted differently depending on the context.
+
+The assumption is that, given a starting point, the likelihood that a certain location will be the destination of a trip depends on two factors: the \textbf{opportunities} represented by the destination, and the number of \textbf{intervening opportunities}, i.e., alternative potential destination that are closer to the starting point but are rejected by the trip maker. The probability that a trip will end in a certain location is then modeled as equal to the probability that it offers an acceptable opportunity, multiplied by the probability that another acceptable opportunity in a closer location has not been chosen. The flow between two locations is:
+\begin{equation*}
+    T_{ij} = O_i \frac{e^{-L V_{ij-1}} - e^{-L V_{ij}}}{1 - e^{-L V_{in}}}
+\end{equation*}
+$O_i$ is the number of trips originating from $i$; $V_{ij}$ is the cumulative number of opportunities up to the $j^{\text{th}}$ location, in order of distance from the origin $i$, and $L$ is an hyperparameter adjusted on empirical data to be equal to the probability of accepting an opportunity destination. The denominator is a normalization factor that ensures that the probabilities sum to 1 ($n$ is the total number of locations in the region considered).
+
+\subsection{Radiation Model}
+The radiation model elaborates the hypothesis of intervening opportunities, and assumes that the choice of a traveler's destination consists in two steps:
+\begin{itemize}
+    \item Each opportunity in every location of the region considered is assigned a fitness number $z$, extracted from a distribution $p(z)$, whose value represents how good the opportunity is for the traveler.
+    \item The traveler ranks all opportunities according to their distance from the origin location, and chooses the closest destination with a fitness number higher than some threshold (which is also a random number extracted from $p(z)$). 
+\end{itemize}
+The average size of the flow between two location is then estimated as:
+\begin{equation*}
+    T_{ij} = O_i \frac{1}{1 - \frac{m_i}{M}} \frac{m_i m_j}{(m_i + s_{ij}) (m_i + m_j + s_{ij})}
+\end{equation*}
+$O_i$ is again the number of trips originating from $i$, $m_i$ and $m_j$ are the number of opportunities at the origin and the destination respectively, $s_{ij}$ is the number of opportunities in a circle of radius $r_{ij}$ centered in $i$ (excluding source and destination). The second term is for normalization, and $M$ is the sum of all the opportunities in the region.
+
+\begin{figure}[H]
+    \centering
+    \includesvg[width=0.65\textwidth]{img/radiation_model.svg}
+    \caption{Example of how an individual chooses its destination in the radiation model. The cat has a threshold of $z=4$, so it chooses the closest location with a fitness number equal or higher than 4.}
+\end{figure}
+
+This model is parameter-free, so it is immediately adapted to the available data qith no training phase; in particular, the flows do not depend from the distribution $p(z)$ of the fitness of the locations. This can also be a disadvantage, however, as the model does not seem to be very robust with changes in the spatial scale. An extended version has been proposed that also considers the spatial distribution of opportunities, and introduces a parameter $\alpha$ that regulates the effect of the number of intervening opportunities.
+
+\subsection{Other Models}
+Most other models developed for the task are variants of the previous three:
+\begin{itemize}
+    \item \textbf{Rank-distance model}: the probability of traveling from a location to the other is inversely proportional to the rank of the destination:
+    \begin{equation*}
+        p_{ij} \propto \frac{1}{(m_i + s_{ij})^{\alpha}} = \frac{1}{\textit{rank}_{ij}^{\alpha}}
+    \end{equation*}
+    \item \textbf{Population-weighted opportunities model}: it considers the opportunities centered at the destination instead of the origin:
+    \begin{equation*}
+        p_{ij} \propto m_j \left(\frac{1}{m_i + m_j + s_{ji}} - \frac{1}{M}\right)
+    \end{equation*}
+    \item \textbf{Deep gravity model}: based on deep neural networks, it is capable of capturing non-linear relationships between the input and output variables. Locations are also better characterized and enriched with data collected from external sources (e.g., land use, transportation networks, POIs). It also uses explainable AI techniques to interpret the results of the training, and find the most influential variables. 
+    
+    The input layer of the network receives all the input features (of the origin, of the destination, and their distance), concatenates them, and passes them to the hidden layers. Each destination is assigned a score using the softmax function on the output layer.
+
+    Other models also use deep learning, such as MoGAN (Generative Adversarial Networks) and LLM-based approaches.
+\end{itemize}
+
+\subsection{Comparison between models}
+
+All the models presented until now will generate values for an Origin-Destination matrix. There exist different ways to evaluate and compare their performance:
+\begin{itemize}
+    \item \textbf{Common part of commuters} (\textbf{CPC}):
+    \begin{equation*}
+        \text{CPC} = \frac{\sum_{i,j} \min(T_{ij}^m , T_{ij}^e)}{\sum_{ij} T_{ij}^e}    
+    \end{equation*}
+    $T_{ij}^m$ is the model's prediction, $T_{ij}^e$ is the empirical value;
+    \item Root mean square error;
+    \item Cosine similarity;
+    \item Correlation coefficients.
+\end{itemize}
