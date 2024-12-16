@@ -34,7 +34,11 @@ Distances on the Earth's surface are not straight lines; they are instead repres
 \begin{equation*}
     \cos(d) = \sin(\textit{lat}_A) \sin(\textit{lat}_B) + \cos(\textit{lat}_B) + cos(\textit{lon}_A - \textit{lon}_B),
 \end{equation*}
-where $d$ is the angular distance between the two points. To convert $d$ to a linear distance measure, it can be multiplied by 111.32 km, which is the length of 1 degree at the equator. This formula is the basis from which the \textbf{haversine formula} is derived.
+where $d$ is the angular distance between the two points. To convert $d$ to a linear distance measure, it can be multiplied by 111.32 km, which is the length of 1 degree at the equator. This formula is the basis from which the \textbf{haversine formula} is derived:
+\begin{gather*}
+    \text{hav}(\theta) = \text{hav}(\textit{lat}_B - \textit{lat}_A) + \cos(\textit{lat}_A)\cos(\textit{lat}_B) \text{hav}(\textit{lon}_B - \textit{lon}_A),\\
+    \text{hav}(\theta) = \sin^2(\frac{\theta}{2})
+\end{gather*}
 
 \section{Trajectories, Tessellations, Flows}
 
@@ -183,7 +187,7 @@ Inverse Distance Weighted (IDW) interpolation calculates an average value using 
 \begin{equation*}
     \hat{Z}_j = \frac{\sum_i Z_i / d_{ij}^n}{\sum_i 1 / d_{ij}^n}
 \end{equation*}
-Here, $d_{ij}$ is the distance between points $i$ and $j$, and $n$ is an hyperparameter that controls the irrelevance of a point as the distance increases/decreases: the larger $n$ is, the less far away samples influence the interpolated value. For $n \rightarrow \infty$, the result is equivalent to proximity interpolation. \\
+Here, $d_{ij}$ is the distance between points $i$ and $j$, and $n$ is a hyperparameter that controls the irrelevance of a point as the distance increases/decreases: the larger $n$ is, the less far away samples influence the interpolated value. For $n \rightarrow \infty$, the result is equivalent to proximity interpolation. \\
 Values returned by this method are always within the range of the known values: $[Z_{min}, Z_{max}]$.
 
 \begin{figure}[ht!]

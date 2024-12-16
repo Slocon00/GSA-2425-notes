@@ -4,7 +4,7 @@ Human mobility refers to the movement in space and time of human beings. Individ
 
 \section{Individual Human Mobility}
 
-\section{Metrics}
+\subsection{Metrics}
 
 \paragraph{Travel Distance (Jump Length)}
 
@@ -63,9 +63,9 @@ A way to represent the movements of an individual is by constructing its \textbf
 \begin{align*}
     &S^{\textit{rand}} = \log_2 N &\text{(Random entropy)} \\
     &S^{\textit{unc}} = - \sum_{i=1}^n p_i \log_2 p_i &\text{(Uncorrelated entropy)} \\
-    &S = -\sum_{T_i' \subset T_i} p_{T_i'} \log_2 p_{T_i'} &\text{(Real entropy)}
+    &S = -\sum_{T' \subset T} p_{T'} \log_2 p_{T'} &\text{(Real entropy)}
 \end{align*}
-Random entropy assumes that each location is visited with equal probability. (Temporal) Uncorrelated entropy assumes heterogeneous visitation patterns, associating each term in the sum with the probability it was visited by the user. Real entropy depends not only on the frequency of visitation, but also on the order in which nodes were visited and the time spent at each of them: $T_i = \{X_1, \dots, X_n\}$ is a sequence of locations at which the user is observed at a certain time interval.
+Random entropy assumes that each location is visited with equal probability. (Temporal) Uncorrelated entropy assumes heterogeneous visitation patterns, associating each term in the sum with the probability it was visited by the user. Real entropy depends not only on the frequency of visitation, but also on the order in which nodes were visited and the time spent at each of them: $T = \{X_1, \dots, X_n\}$ is a sequence of locations at which the user is observed at a certain time interval.
 
 \subsection{Modeling}
 
@@ -149,7 +149,7 @@ The assumption is that, given a starting point, the likelihood that a certain lo
 \begin{equation*}
     T_{ij} = O_i \frac{e^{-L V_{ij-1}} - e^{-L V_{ij}}}{1 - e^{-L V_{in}}}
 \end{equation*}
-$O_i$ is the number of trips originating from $i$; $V_{ij}$ is the cumulative number of opportunities up to the $j^{\text{th}}$ location, in order of distance from the origin $i$, and $L$ is an hyperparameter adjusted on empirical data to be equal to the probability of accepting an opportunity destination. The denominator is a normalization factor that ensures that the probabilities sum to 1 ($n$ is the total number of locations in the region considered).
+$O_i$ is the number of trips originating from $i$; $V_{ij}$ is the cumulative number of opportunities up to the $j^{\text{th}}$ location, in order of distance from the origin $i$, and $L$ is a hyperparameter adjusted on empirical data to be equal to the probability of accepting an opportunity destination. The denominator is a normalization factor that ensures that the probabilities sum to 1 ($n$ is the total number of locations in the region considered).
 
 \subsection{Radiation Model}
 The radiation model elaborates the hypothesis of intervening opportunities, and assumes that the choice of a traveler's destination consists in two steps:
