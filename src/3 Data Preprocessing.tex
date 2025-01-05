@@ -1,6 +1,6 @@
 \chapter{Data Preprocessing}
 
-Data that represents trajectories of moving entities is often affected by errors. Their presence can greatly influence the result of analysis, so it is important to identify and remove them. Additionally, datasets tend to contain huge amounts of objects, meaning that the time and space complexity that may bee too high. Finally, individual trajectories that are too long and complex may cause the failure of data mining algorithms due to the inability of extracting details from them. Summarizing the information carried by trajectories via a preprocessing phase is a necessary step to make sure subsequent analysis can be carried out efficiently and effectively.
+Data that represents trajectories of moving entities is often affected by errors. Their presence can greatly influence the result of analysis, so it is important to identify and remove them. Additionally, datasets tend to contain huge amounts of objects, meaning that the time and space complexity that may be too high. Finally, individual trajectories that are too long and complex may cause the failure of data mining algorithms due to the inability of extracting details from them. Summarizing the information carried by trajectories via a preprocessing phase is a necessary step to make sure subsequent analysis can be carried out efficiently and effectively.
 
 Preprocessing techniques can be divided into two families: context-based filtering, and movement-based filtering. \textbf{Context-based filtering} relies on contextual geographical information provided by the environment, such as road networks, to remove points that are deemed to be errors. These methods may not always be effective, since they assume that trajectories must always be on a road (or adapt in some way to the available data); this may not always be true, for example for vehicles moving across the sea or open fields, or for pedestrians. \textbf{Movement-based filtering} uses only the geometry and dynamics of the movement described by the trajectory to find points that do not match the expected behaviour of the moving entity.
 
@@ -8,7 +8,7 @@ Preprocessing techniques can be divided into two families: context-based filteri
 
 \subsection{Speed-based Filtering}
 
-This filtering is based on the idea that tha speed of the moving entity must always be within a certain range of allowed values, without any abrupt change. Initially, the first point of the trajectory is found and set as valid; then, each subsequent point is scanned in order according to the timestamp, and the speed $v$ between the current and the previous point is calculated:
+This filtering is based on the idea that the speed of the moving entity must always be within a certain range of allowed values, without any abrupt change. Initially, the first point of the trajectory is found and set as valid; then, each subsequent point is scanned in order according to the timestamp, and the speed $v$ between the current and the previous point is calculated:
 \begin{itemize}
     \item If $v$ is larger than a given threshold, the point is marked as invalid and removed from the trajectory;
     \item If $v$ is within the threshold, the point is marked as valid and kept.
