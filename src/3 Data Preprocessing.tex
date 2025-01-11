@@ -1,13 +1,13 @@
 \chapter{Data Preprocessing}
 
-Data that represents trajectories of moving entities is often affected by errors. Their presence can greatly influence the result of analysis, so it is important to identify and remove them. Additionally, datasets tend to contain huge amounts of objects, meaning that the time and space complexity that may be too high. Finally, individual trajectories that are too long and complex may cause the failure of data mining algorithms due to the inability of extracting details from them. Summarizing the information carried by trajectories via a preprocessing phase is a necessary step to make sure subsequent analysis can be carried out efficiently and effectively.
+Data that represents trajectories of moving entities is often affected by errors. Their presence can greatly influence the result of analysis, so it is important to identify and remove them. Additionally, datasets tend to contain huge amounts of objects, meaning that the time and space complexity that may be too high. Individual trajectories that are too long and complex may cause the failure of data mining algorithms due to the inability of extracting details from them. Summarizing the information carried by trajectories via a preprocessing phase is a necessary step to make sure subsequent analysis can be carried out efficiently and effectively. Additionally, trajectories usually represent the movement of an individual over days, weeks, months: splitting trajectories into separate trips can be used to better characterize the behaviour of the individual.
 
 Preprocessing techniques can be divided into two families: context-based filtering, and movement-based filtering. \textbf{Context-based filtering} relies on contextual geographical information provided by the environment, such as road networks, to remove points that are deemed to be errors. These methods may not always be effective, since they assume that trajectories must always be on a road (or adapt in some way to the available data); this may not always be true, for example for vehicles moving across the sea or open fields, or for pedestrians. \textbf{Movement-based filtering} uses only the geometry and dynamics of the movement described by the trajectory to find points that do not match the expected behaviour of the moving entity.
 
-\section{Movement-based Filtering}
+\section{Error Detection and Trajectory Reconstruction}
+\subsection{Movement-based Filtering}
 
-\subsection{Speed-based Filtering}
-
+\paragraph{Speed-based Filtering}
 This filtering is based on the idea that the speed of the moving entity must always be within a certain range of allowed values, without any abrupt change. Initially, the first point of the trajectory is found and set as valid; then, each subsequent point is scanned in order according to the timestamp, and the speed $v$ between the current and the previous point is calculated:
 \begin{itemize}
     \item If $v$ is larger than a given threshold, the point is marked as invalid and removed from the trajectory;
@@ -21,12 +21,10 @@ This filtering is based on the idea that the speed of the moving entity must alw
     \label{fig:filtering-speed}
 \end{figure}
 
-\section{Context-based Filtering}
+\subsection{Context-based Filtering}
 
-\subsection{Point Map Matching}
-
-Map matching is the procedure of determining which road on a map a vehicle is using, given a set of GPS points. This approach both filters out noise and outliers, and adds new information to the dataset by associating each point with an identifier of the road it is matched to. Once points have been mapped to a specific road, any point farther than a certain threshold can be removed as noise.
-
+\paragraph{Point Map Matching}
+Map matching is the procedure of determining which road on a map a vehicle is using, given a set of GPS points. This approach both filters out noise and outliers, and adds new information to the dataset by associating each point with an identifier of the road it is matched to. Once points have been mapped to a specific road, any point farther than a certain threshold can be removed as noise.\\
 The main issues of this approaches are:
 \begin{itemize}
     \item Projecting individual points requires a comparison for each point and each road segment, which can be computationally expensive;
@@ -56,13 +54,14 @@ Many algorithms on trajectories tend to be very expensive, and their complexity 
 \begin{algorithm}
 \caption{Ramer-Douglas-Peucker pseudocode.} 
 \begin{algorithmic}[1]
-    \Function{RamerDouglasPeucker}{$P, \varepsilon, p_i, p_j$} \Comment{$P = \langle p_1, \dots, p_n \rangle$}
+    \Function{RamerDouglasPeucker}{$P, \varepsilon, p_i, p_j$}
+    \State\Comment{$P = \langle p_1, \dots, p_n \rangle$, $p_i=p_1, p_j=p_n$}
     
     \State Find vertex $p_f \in \langle p_i, \dots, p_j \rangle$ farthest from the line $p_i p_j$.
         
     \State $\textit{dist} \gets$ distance between $p_f$ and $p_i p_j$.
 
-    \If{$\textit{dist} < \varepsilon$}
+    \If{$\textit{dist} > \varepsilon$}
         \State \Call{RamerDouglasPeucker}{$P,p_i,p_f$}
         \State \Call{RamerDouglasPeucker}{$P,p_f,p_j$}
     \EndIf
@@ -100,6 +99,7 @@ The time complexity is $T(n) = O(n) + T(n-1) = O(n^2)$ in the worst case, but it
             \EndIf
         \EndWhile
         \State Add $p_j$ to $P'$.
+        \State $i \gets i + 1$.
     \EndWhile
 
     \State Return $P'$.
@@ -111,11 +111,15 @@ Either way, simplification has the side effect of modifying average speed estima
 
 \section{Stop Detection for Trajectory Segmentation}
 
-GPS data is normally formed by a continuous stream of points, but there is no explicit separation between the trajectories of the same entity. \textbf{Stop detection} is a technique used to identify moments in which the entity is staying still (or moving very slowly) to be used as endpoints of different trajectories. For example, if we consider a person moving through a regular work day, we may observe that person move away from a spot (likely his/her house), then stop at what is either school or work, then make another stop at the gym, and finally return back home. Every movement between each of these stops can be isolated as its own trajectory.
+GPS data is normally formed by a continuous stream of points, but there is no explicit separation between the trajectories of the same entity. \textbf{Stop detection} is a technique used to identify moments in which the entity is staying still (or moving very slowly) to be used as endpoints of different trajectories. For example, if we consider a person moving through a regular work day, we may observe that person move away from a spot (likely his/her house), then stop at what is either school or work, then make another stop at the gym, and finally return back home. Every movement between each of these stops can be isolated as its own trajectory. The general criteria is: if the estimated speed from a set of points is very low (i.e., very little movement over a long time interval), the set of points represent a stop. The sequence of points between stops is a trajectory. To check if a point belongs to a stop, typical space and time thresholds are $Th_S \in [50, 250]$ (meters), and $Th_T \in [1, 20]$ (minutes), but depending on the context, these values may change: thresholds for a car are different from those for a pedestrian, for example.
 
-The general criteria is: the estimated speed from a set of points is very low (i.e., very little movement over a long time interval), the set of points represent a stop. The sequence of points between stops is a trajectory. To check if a point belongs to a stop, typical space and time thresholds are $Th_S \in [50, 250]$ (meters), and $Th_T \in [1, 20]$ (minutes), but depending on the context, these values may change: thresholds for a car are different from those for a pedestrian, for example.
+When it comes to vehicles specifically, stops can often be detected by simply checking when the engine is on or off. This is generally good, but may not detect stops that are very short. A more general approach is to use a density-based analysis: the faster an entity is, the less of its own points are found around it as it is moving. By looking at how the density of traces changes through time, we can also tell how a user is moving, e.g., by walking, by car, by bike, or using public transportation.
 
-When it comes to vehicles specifically, stops can often be detected by simply checking when the engine is on or off. This is generally good, but may not detect stops that are very short. A more general approach is to use a density-based approach: the faster an entity is, the less of its own points are found around it as it is moving. 
+\begin{figure}[h]
+    \centering
+    \includesvg[width=0.75\textwidth]{img/stop_detection_density.svg}
+    \caption{Example of density-based stop detection. Depending on the speed at which the individual moves, the number of points around it changes.}
+\end{figure}
 
 After trajectory segmentation has been performed, we can use them to study the behaviour of the individual, and eventually find deviations from the norm. A way to represent this information is building the entity's \textbf{Individual Mobility Graph}, where each location is a node and each movement is an edge; this means that for each trajectory, only the starting and ending locations are recorded in the graph. Naturally, denser areas with more nodes will represent important places. These locations are identified using a clustering algorithm, and are each associated with their frequency; trips between points belonging to the same cluster (location) are then aggregated as edges between the entire clusters. The basic assumption is that the location with the highest frequency is home, the second most frequent location is work, and so on. An alternative approach also considers the actual time of the day the traces were recorded at: points recorded during nighttime or early morning are more likely to be home, while those recorded during the morning and early afternoon are more likely to be work.
 

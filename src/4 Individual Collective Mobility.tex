@@ -8,21 +8,20 @@ Human mobility refers to the movement in space and time of human beings. Individ
 
 \paragraph{Travel Distance (Jump Length)}
 
-\textbf{Travel distance} is the distance between two consecutive locations visited by the individual. Travel distance may also be called in different ways depending on the context it is used in; the term \textbf{``jump length''} is is used to refer to different appearances of the same object in different locations, without necessarily implying a direct movement between them. An early example of mobility analysis involved information about the spatial trajectories of bank-notes. The data was sourced from a US-based website where users could input the identifier of their dollar bills, specifying where they are located. In this sense, the distance between two different locations in which a bank-note appears in is a jump length.
-
-Regardless of how it is defined, distance, denoted as $\Delta r$, is calculated as
+\textbf{Travel distance}, or \textbf{jump lenght}, is the distance between two consecutive locations visited by the individual. An early example of mobility analysis involved information about the spatial trajectories of dollar bills. The data was sourced from a US-based website where users could input the identifier of their bills, specifying where they are located. The distance between two consecutive locations in which a dollar bill appears in is the jump lenght traversed by the ``individual''. \\
+Travel distance, denoted as $\Delta r$, is calculated as:
 \begin{equation*}
     \Delta r = \| r(t) - r(t + dt) \|_2
 \end{equation*}
-i.e., the Euclidean distance between the locations recorded at intervals $t$ and $t + dt$. It is interesting to study the distribution of $\Delta r$ within a population, approximating the probability distribution function of distances/jump lengths, $P(\Delta r)$. Empirical studies observed how this distribution follows a \textit{power-law}: a scale-free distribution (i.e., with no/meaningless mean) with a heavy tail:
+i.e., the Euclidean distance between the locations recorded at intervals $t$ and $t + dt$. It is interesting to study the distribution of $\Delta r$ within a population, approximating the probability distribution function of distances/jump lengths, $P(\Delta r)$. Empirical studies observed how this distribution is a \textit{power-law}, a scale-free distribution (with no/meaningless mean) with a heavy tail:
 \begin{equation*}
     P(r) \sim r^{-(1+\beta)}
 \end{equation*}
 where $\beta$ is the scaling exponent, which is chosen depending on the context.
-\begin{figure}[H]
+\begin{figure}[h]
     \centering  
     \includesvg[width=0.75\textwidth]{img/zipf.svg}
-\end{figure}
+\end{figure} \\
 Power law behaviour has been observed in the trajectories of mobile phone users as well, specifically following a truncated power law:
 \begin{equation*}
     P(r) = (r + r_0)^{-\beta} \exp(-r/\kappa)
@@ -52,7 +51,7 @@ An interesting aspect to consider is the phenomenon of \textbf{saturation}, obse
 
 By itself, the radius of gyration does not carry any information about the relevance of a certain location in an individual's movements. An individual who spends most of his/her time in his/her most visited locations (e.g., home and work) will have a large $r_g$ if the two are far away; if instead they are close to each other, the $r_g$ may still be large, since there are likely other longer movements that contribute to the radius of gyration. To address this issue, one can consider the frequency of visits to a location, ranking them accordingly, and then calculate the \textbf{$k$-radius of gyration}:
 \begin{equation*}
-    r_g^{(k)} = \sqrt{\frac{\sum_{j=1}^k n_j (r_j - r_{\textit{cm}^{(k)}})^2}{N_k}}
+    r_g^{(k)} = \sqrt{\frac{\sum_{i=1}^k n_i \|r_i - r_{\textit{cm}^{(k)}}\|^2}{N_k}}
 \end{equation*}
 where $N_k$ is the number of visits to the $k$ most frequented locations, $r_{\text{cm}}^{(k)}$ is the centroid of those top $k$ locations, and $n_j$ is the number of visits to the $j^{\textit{th}}$ location. The frequency of visits also follows a power law distribution, since people will devote most of their time to few places (home, work, school, etc.), and less and less time to others.
 
@@ -105,12 +104,12 @@ Mobility information of individuals can be aggregated to study flows of individu
     \end{equation*}
 \end{itemize}
 
-There exist different models that can be used to infer/generate flows from OD matrices. The problem can be interpreted as a classification task, where locations are the classes: given a starting point, we want to predict which location is goind to be the ending point of the trip. Each model will estimate this probability from a different set of variables that characterize the locations, with the goal of maximizing the likelihood of the observed data. Models may also be \textbf{constrained} or \textbf{uncostrained}, imposing certain conditions on the flow matrix:
+There exist different models that can be used to infer/generate flows from OD matrices. The problem can be interpreted as a classification task, where locations are the classes: given a starting point, we want to predict which location is going to be the ending point of the trip. Each model will estimate this probability from a different set of variables that characterize the locations, with the goal of maximizing the likelihood of the observed data. Models may also be \textbf{constrained} or \textbf{uncostrained}, imposing certain conditions on the flow matrix:
 \begin{align*}
     &\sum_{ij} T_{ij} = N & \text{(Unconstrained/ globally constrained)} \\
     &\sum_j T_{ij} = O_i \ \forall i &\text{(Origin constrained)} \\
-    &\sum_i T_{ij} = D_i \ \forall j &\text{(Destination constrained)} \\
-    &\sum_j T_{ij} = O_i \ , \ \sum_i T_{ij} = D_i &\text{(Doubly constrained)}
+    &\sum_i T_{ij} = D_j \ \forall j &\text{(Destination constrained)} \\
+    &\sum_j T_{ij} = O_i \ , \ \sum_j T_{ji} = D_i &\text{(Doubly constrained)}
 \end{align*}
 Over time, two main schools of though have emerged: the first one assumes that the number of trips between two locations is inversely proportional to their distance (\textbf{gravity model}), while the other instead focuses on \textbf{intervening opportunities}, meaning that locations with a lot of opportunities of some kind (e.g., jobs, schooling, services, etc.) will attract more people.
 
@@ -169,7 +168,7 @@ $O_i$ is again the number of trips originating from $i$, $m_i$ and $m_j$ are the
     \caption{Example of how an individual chooses its destination in the radiation model. The cat has a threshold of $z=4$, so it chooses the closest location with a fitness number equal or higher than 4.}
 \end{figure}
 
-This model is parameter-free, so it is immediately adapted to the available data qith no training phase; in particular, the flows do not depend from the distribution $p(z)$ of the fitness of the locations. This can also be a disadvantage, however, as the model does not seem to be very robust with changes in the spatial scale. An extended version has been proposed that also considers the spatial distribution of opportunities, and introduces a parameter $\alpha$ that regulates the effect of the number of intervening opportunities.
+This model is parameter-free, so it is immediately adapted to the available data with no training phase; in particular, the flows do not depend from the distribution $p(z)$ of the fitness of the locations. This can also be a disadvantage, however, as the model does not seem to be very robust with changes in the spatial scale. An extended version has been proposed that also considers the spatial distribution of opportunities, and introduces a parameter $\alpha$ that regulates the effect of the number of intervening opportunities.
 
 \subsection{Other Models}
 Most other models developed for the task are variants of the previous three:
