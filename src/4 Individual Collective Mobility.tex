@@ -66,6 +66,8 @@ A way to represent the movements of an individual is by constructing its \textbf
 \end{align*}
 Random entropy assumes that each location is visited with equal probability. (Temporal) Uncorrelated entropy assumes heterogeneous visitation patterns, associating each term in the sum with the probability it was visited by the user. Real entropy depends not only on the frequency of visitation, but also on the order in which nodes were visited and the time spent at each of them: $T = \{X_1, \dots, X_n\}$ is a sequence of locations at which the user is observed at a certain time interval.
 
+By analyzing CDR data, it was found that the distribution of real entropy has a mean of 0.8. This means that if a user's destination were unknown, the number of possible locations it could choose to travel to is on average $2^{0.8} \approx 1.74$, so less than 2.
+
 \subsection{Modeling}
 
 The \textbf{Exponential-Preferential Return} (\textbf{EPR}) model is based on two key mechanisms observed in human trajectories: \textit{exploration} and \textit{preferential return}. Most movements tend to frequently return to a few previously known locations (\textit{preferential return}), but every once in a while, the individual may decide to explore a new location (\textit{exploration}). This method models both the distance and the wait time between subsequent visits to the same location as a power law with exponential cutoff.
