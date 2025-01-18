@@ -128,23 +128,21 @@ where $K$ is a constant, $m_i$ and $m_j$ are the masses of the two locations, wh
 \begin{align*}
    &m_i = P_i^{\alpha} & m_j = P_j^{\beta}
 \end{align*}
-where $\alpha$ and $\beta$ are the free  parameters of the model.
+In practice, other measures of ``attractiveness'' can be used; for example, variables that quantify wealth, or quality of life. This model is very popular, as it is easy to train. Still, it grossly simplifies real flows, since it is not directly trained on empirical information from an OD matrix. Since it is trained on a dataset to adapt its parameters, it is also rather sensitive to fluctuations or incomplete data.
 
-This model is very popular, especially for transport planning and spatial economics. Still, it grossly simplifies flows and may not be able to capture empirical observations. Since it is trained on a dataset to adapt its parameters, it is also rather sensitive to fluctuations or incomplete data.
-
-Some issues can be solved using constrained versions of the model. The number of people arriving to or coming from a location can be fixed to a known quantity, and the model can be used to esitmate the other end of the flow:
-\begin{align*}
-    &T_{ij} = K_i O_i m_j f(r_{ij}) &K_{i} = \frac{1}{\sum_k m_k f(r_{ik})} \\
-    &T_{ij} = K_j m_i D_j f(r_{ij}) &K_{j} = \frac{1}{\sum_k m_k f(r_{kj})}
-\end{align*}
-Note that there is a different proportionality constant for each origin/destination. Alternatively, both origin and destination can be doubly constrained:
+Some issues can be solved using constrained versions of the model. If out-flow and in-flow information is known, the number of people arriving to and coming from a location can be fixed to a known quantity:
+\begin{equation*}
+    T_{ij} = K_i O_i m_j f(r_{ij}), \quad K_{i} = \frac{1}{\sum_k m_k f(r_{ik})}
+\end{equation*}
+(singly constrained on the out-flows) and
 \begin{align*}
     &T_{ij} = K_i O_i L_j D_j f(r_{ij}) &K_i = \frac{1}{\sum_j L_j D_j f(r_{ij})} \,, \ \ L_j = \frac{1}{\sum_i K_i O_i f(r_{ij})}
 \end{align*}
-Choosing the right constrained or unconstrained model depends on the information available, and on the objective: if the goal is to approximate the flows from indirect socio-economic variables, unconstrained models are preferable; if instead we have out-going and/or in-going flows available, and the goal is to estimate the values of an OD matrix, constrained models are appropriate.
+(doubly constrained). \\
+Choosing the right constrained or unconstrained model depends on the information available, and on the objective: if the goal is to approximate the flows only from indirect socio-economic variables (such as the population), unconstrained models are preferable; if instead we have out-going and/or in-going flows available, and the goal is to accurately generate the values of an OD matrix, constrained models are appropriate.
 
 \subsection{Intervening Opportunities Model}
-This model is based on the idea that movements across locations are not simply controlled by distance, but by th number of opportunities available. In the original paper this approach was first presented in, the author did not provide a precise definition of ``opportunity'', but it can be interpreted differently depending on the context.
+This model is based on the idea that movements across locations are not simply controlled by distance, but by the number of opportunities available. In the original paper this approach was first presented in, the author did not provide a precise definition of ``opportunity'', but it can be interpreted differently depending on the context.
 
 The assumption is that, given a starting point, the likelihood that a certain location will be the destination of a trip depends on two factors: the \textbf{opportunities} represented by the destination, and the number of \textbf{intervening opportunities}, i.e., alternative potential destination that are closer to the starting point but are rejected by the trip maker. The probability that a trip will end in a certain location is then modeled as equal to the probability that it offers an acceptable opportunity, multiplied by the probability that another acceptable opportunity in a closer location has not been chosen. The flow between two locations is:
 \begin{equation*}
@@ -185,7 +183,7 @@ Most other models developed for the task are variants of the previous three:
     \end{equation*}
     \item \textbf{Deep gravity model}: based on deep neural networks, it is capable of capturing non-linear relationships between the input and output variables. Locations are also better characterized and enriched with data collected from external sources (e.g., land use, transportation networks, POIs). It also uses explainable AI techniques to interpret the results of the training, and find the most influential variables. 
     
-    The input layer of the network receives all the input features (of the origin, of the destination, and their distance), concatenates them, and passes them to the hidden layers. Each destination is assigned a score using the softmax function on the output layer.
+    The input layer of the network receives all the input features (of the origin, of the destinations, and their respective distance), concatenates them, and passes them to the hidden layers. Each destination is assigned a score using the softmax function on the output layer.
 
     Other models also use deep learning, such as MoGAN (Generative Adversarial Networks) and LLM-based approaches.
 \end{itemize}
